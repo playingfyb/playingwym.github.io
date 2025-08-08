@@ -1,40 +1,54 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Fan Card Generator — Preview</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Fan Card Generator</title>
 <style>
   :root{
     --card-w:760; --card-h:1080;
-    --accent:#ff7a18; --muted:#9fb0c2; --bg:#071428;
+    --accent:#ffb05a; --muted:#b9c7d3; --bg:#071428;
   }
   body{
-    margin:0; min-height:100vh; font-family: Inter, "Segoe UI", Roboto, Arial;
-    background: linear-gradient(180deg,#071428,#061726); color:#eef6fb;
-    display:flex; gap:28px; padding:28px; align-items:flex-start; justify-content:center;
+    margin:0;
+    min-height:100vh;
+    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(180deg,#071428,#061020);
+    color:#eef7fb;
+    display:flex;
+    gap:28px;
+    padding:28px;
+    align-items:flex-start;
+    justify-content:center;
   }
 
-  /* controls panel */
+  /* Controls */
   .panel{
-    width:360px; background: rgba(255,255,255,0.03); border-radius:12px; padding:16px;
+    width:360px;
+    background: rgba(255,255,255,0.03);
+    border-radius:12px;
+    padding:16px;
     box-shadow:0 10px 30px rgba(0,0,0,0.6);
   }
-  .panel h2{ margin:0 0 10px 0; font-size:20px; color:var(--muted); }
-  label{ display:block; font-size:13px; color:var(--muted); margin-top:10px; }
+  .panel h2{ margin:0 0 10px; color:var(--muted); font-size:18px; }
+  label{ display:block; font-size:13px; color:var(--muted); margin-top:12px; }
   input[type=text], select{
-    width:100%; padding:10px 12px; margin-top:6px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);
+    width:100%;
+    padding:10px 12px;
+    margin-top:6px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.06);
     background:#fff; color:#0b1720; font-size:15px;
   }
-  .row { display:flex; gap:8px; margin-top:12px; }
-  button{ padding:10px 14px; border-radius:8px; border:0; cursor:pointer; font-weight:700; }
-  .btn-gen{ background: linear-gradient(90deg,var(--accent),#ff4e50); color:#fff; }
-  .btn-down{ background: transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.04); }
+  .row{ display:flex; gap:8px; margin-top:14px; }
+  button{ padding:10px 12px; border-radius:8px; border:0; font-weight:700; cursor:pointer }
+  .btn-gen{ background: linear-gradient(90deg,var(--accent),#ff8a3a); color:white }
+  .btn-down{ background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.04) }
 
-  .hint{ margin-top:10px; color:#9fb0c2; font-size:12px; }
+  .hint{ margin-top:8px; color:#9fb0c2; font-size:12px; }
 
-  /* preview */
-  .preview{ max-width:760px; width: min(56vw, 760px); }
+  /* Preview */
+  .preview{ max-width:760px; width: min(56vw,760px); }
   .preview h3{ color:var(--muted); margin:0 0 10px 0; font-size:14px; }
   canvas{ width:100%; height:auto; border-radius:14px; display:block; box-shadow:0 16px 60px rgba(2,8,23,0.6); background:#071026; }
 
@@ -50,17 +64,17 @@
   <div class="panel">
     <h2>Fan Card Controls</h2>
 
-    <label for="nameInput">Name (will show as <strong>Name: ...</strong>)</label>
-    <input id="nameInput" type="text" placeholder="Enter player's name (e.g. Amartya)">
+    <label for="nameInput">Name (shows as <strong>Name: ...</strong>)</label>
+    <input id="nameInput" type="text" placeholder="Enter player's name (e.g. Amartya)" value="AMARTYA">
 
-    <label for="roleSelect">Role (also shown as <strong>Role: ...</strong>)</label>
+    <label for="roleSelect">Role (shows as <strong>Role: ...</strong>)</label>
     <select id="roleSelect"></select>
 
     <label for="teamSelect">Team</label>
     <select id="teamSelect"></select>
 
-    <div class="row">
-      <button id="generateBtn" class="btn-gen">Generate</button>
+    <div class="row" style="margin-top:12px;">
+      <button id="generateBtn" class="btn-gen">Generate Preview</button>
       <button id="downloadBtn" class="btn-down">Download PNG</button>
     </div>
 
@@ -69,237 +83,3 @@
 
   <div class="preview">
     <h3>Live Preview</h3>
-    <canvas id="cardCanvas" width="760" height="1080" aria-label="Fan card preview"></canvas>
-  </div>
-
-<script>
-/* -------------------------
-   CONFIG
-   ------------------------- */
-const YOUTUBE_LINK = "https://www.youtube.com/@UniversaLGCofficial";
-
-const ROLES = [
-  { file: "role_1.png", name: "IGL" },
-  { file: "role_2.png", name: "Supporter / Filter" },
-  { file: "role_3.png", name: "Entry Fragger" },
-  { file: "role_4.png", name: "AR" }
-];
-
-const TEAMS = [
-  { file: "team_logo_1.png",  name: "VARANASI" },
-  { file: "team_logo_2.png",  name: "KALINGA WARRIORS" },
-  { file: "team_logo_3.png",  name: "SRINAGAR'S SEN" },
-  { file: "team_logo_4.png",  name: "DELHI ASSAULTERS" },
-  { file: "team_logo_5.png",  name: "PATNA IDATENS" },
-  { file: "team_logo_6.png",  name: "AHMEDABAD KE DAKU" },
-  { file: "team_logo_7.png",  name: "HYDERABAD MAVERICKS" },
-  { file: "team_logo_8.png",  name: "BOMBAY TYRANTS" },
-  { file: "team_logo_9.png",  name: "TEAM LUCKNOW CITIZENS" },
-  { file: "team_logo_10.png", name: "INDORI BISCUITS" },
-  { file: "team_logo_11.png", name: "DONT PEEK JAIPUR" },
-  { file: "team_logo_12.png", name: "PTOWN" },
-  { file: "team_logo_13.png", name: "CHANDIGARH WARRIOR'S" },
-  { file: "team_logo_14.png", name: "KOLKATA GAMERS." },
-  { file: "team_logo_15.png", name: "SHIMLA SLEDGERS" },
-  { file: "team_logo_16.png", name: "GUWAHATI GUNSLINGERS" },
-  { file: "team_logo_17.png", name: "GOA CLASHERS" },
-  { file: "team_logo_18.png", name: "RUTHLESS THALAIVAS" },
-  { file: "team_logo_19.png", name: "LADAKH LEGENDS" },
-  { file: "team_logo_20.png", name: "BANGLORE BANDITS" }
-];
-
-/* -------------------------
-   UI wiring
-   ------------------------- */
-const roleSelect = document.getElementById('roleSelect');
-const teamSelect = document.getElementById('teamSelect');
-const nameInput = document.getElementById('nameInput');
-const generateBtn = document.getElementById('generateBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-
-ROLES.forEach(r => { const o = document.createElement('option'); o.value = r.file; o.textContent = r.name; roleSelect.appendChild(o); });
-TEAMS.forEach(t => { const o = document.createElement('option'); o.value = t.file; o.textContent = t.name; teamSelect.appendChild(o); });
-
-/* -------------------------
-   Canvas rendering
-   ------------------------- */
-const canvas = document.getElementById('cardCanvas');
-const ctx = canvas.getContext('2d', { alpha:false });
-const W = canvas.width, H = canvas.height;
-
-// Load image with promise
-function loadImage(path){
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error('Failed to load ' + path));
-    img.src = path;
-  });
-}
-
-function roundRect(ctx, x, y, w, h, r){
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-}
-
-// draw background modern card
-function drawBackground(){
-  // gradient
-  const g = ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#061426');
-  g.addColorStop(0.65,'#072633');
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,W,H);
-
-  // subtle central panel
-  ctx.fillStyle = 'rgba(255,255,255,0.02)';
-  roundRect(ctx, 40, 60, W-80, H-260, 18);
-  ctx.fill();
-
-  // large orange frame area for role image
-  ctx.fillStyle = '#f7a047';
-  roundRect(ctx, 120, 100, W-240, 520, 12);
-  ctx.fill();
-
-  // bottom area
-  ctx.fillStyle = 'rgba(255,255,255,0.03)';
-  roundRect(ctx, 48, H-420, W-96, 340, 12);
-  ctx.fill();
-
-  // small inner border
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.lineWidth = 2;
-  roundRect(ctx, 40, 60, W-80, H-260, 18);
-  ctx.stroke();
-}
-
-async function renderCard(){
-  // read UI values
-  const nameRaw = nameInput.value || '';
-  const name = String(nameRaw).trim() || 'PLAYER NAME';
-  const roleFile = roleSelect.value;
-  const roleObj = ROLES.find(r => r.file === roleFile) || {name:''};
-  const roleName = roleObj.name || '';
-  const teamFile = teamSelect.value;
-  const teamObj = TEAMS.find(t => t.file === teamFile) || {name:''};
-  const teamName = teamObj.name || '';
-
-  // background
-  drawBackground();
-
-  // role image area: try load and draw
-  try {
-    const roleImg = await loadImage('role_images/' + roleFile);
-    // fit into rectangle  (box: x=130,y=115,w=W-260,h=500)
-    const bx = 130, by = 115, bw = W-260, bh = 500;
-    let scale = Math.min(bw/roleImg.width, bh/roleImg.height);
-    const dw = Math.round(roleImg.width * scale), dh = Math.round(roleImg.height * scale);
-    const dx = bx + Math.round((bw - dw)/2), dy = by + Math.round((bh - dh)/2);
-    ctx.drawImage(roleImg, dx, dy, dw, dh);
-  } catch(err){
-    // placeholder if missing
-    ctx.fillStyle = 'rgba(255,255,255,0.06)';
-    roundRect(ctx, 130, 115, W-260, 500, 12);
-    ctx.fill();
-    console.warn(err);
-  }
-
-  // NAME (left bottom)
-  ctx.fillStyle = '#f0efe7';
-  ctx.font = '700 36px Inter, Arial';
-  ctx.textAlign = 'left';
-  ctx.fillText('Name:', 80, H - 230);
-  ctx.font = '700 40px Inter, Arial';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText(name.toUpperCase(), 80, H - 190);
-
-  // ROLE (right bottom)
-  ctx.textAlign = 'right';
-  ctx.fillStyle = '#f0efe7';
-  ctx.font = '700 32px Inter, Arial';
-  ctx.fillText('Role:', W - 80, H - 230);
-  ctx.font = '700 36px Inter, Arial';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText(roleName.toUpperCase(), W - 80, H - 190);
-
-  // TEAM label and logo (left)
-  ctx.textAlign = 'left';
-  ctx.fillStyle = '#cfe0ea';
-  ctx.font = '600 20px Inter, Arial';
-  ctx.fillText('Team:', 80, H - 130);
-
-  // draw team logo (box at x=80,y=H-120,w=140,h=140)
-  try {
-    const tImg = await loadImage('team_logos/images/' + teamFile);
-    const tw = 130, th = 130;
-    ctx.drawImage(tImg, 80, H - 120, tw, th);
-    // team name next to logo
-    ctx.font = '700 20px Inter, Arial';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(teamName, 220, H - 78);
-  } catch(e){
-    ctx.fillStyle = 'rgba(255,255,255,0.02)';
-    roundRect(ctx, 80, H - 120, 130, 130, 12);
-    ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '700 20px Inter, Arial';
-    ctx.fillText(teamName || 'No team selected', 220, H - 78);
-    console.warn(e);
-  }
-
-  // small QR bottom-right
-  try {
-    const qrPath = "https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=" + encodeURIComponent(YOUTUBE_LINK);
-    const qrImg = await loadImage(qrPath);
-    const qrW = 100;
-    ctx.drawImage(qrImg, W - 80 - qrW, H - 80 - qrW, qrW, qrW);
-    ctx.font = '600 12px Inter, Arial';
-    ctx.fillStyle = '#a9b7c3';
-    ctx.textAlign = 'center';
-    ctx.fillText('Scan → Live', W - 80 - qrW/2, H - 20);
-  } catch(err){
-    console.warn('QR failed', err);
-  }
-
-  // small footer watermark
-  ctx.font = '600 12px Inter, Arial';
-  ctx.fillStyle = 'rgba(255,255,255,0.04)';
-  ctx.textAlign = 'center';
-  ctx.fillText('Fan-made • UniversaLGCofficial', W/2, H - 12);
-}
-
-/* -------------------------
-   live interactions & download
-   ------------------------- */
-generateBtn.addEventListener('click', renderCard);
-nameInput.addEventListener('input', renderCard);
-roleSelect.addEventListener('change', renderCard);
-teamSelect.addEventListener('change', renderCard);
-
-downloadBtn.addEventListener('click', async () => {
-  await renderCard(); // latest
-  const dataUrl = canvas.toDataURL('image/png');
-  const a = document.createElement('a');
-  a.href = dataUrl;
-  a.download = 'fan_card.png';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-});
-
-// initial render
-window.addEventListener('load', () => {
-  // set default selects to first values
-  roleSelect.selectedIndex = 0;
-  teamSelect.selectedIndex = 14; // default to SHIMLA SLEDGERS (index 14 -> team_logo_15)
-  renderCard();
-});
-</script>
-</body>
-</html>
