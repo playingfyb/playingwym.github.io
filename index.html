@@ -2,137 +2,161 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cyberpunk Fan Card</title>
+<title>Cyberpunk Fan Card Generator</title>
 <style>
     body {
-        background-color: #0a0a0a;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        font-family: 'Orbitron', sans-serif;
+        background: #0a0a0a;
         color: white;
+        font-family: 'Orbitron', sans-serif;
+        text-align: center;
     }
-
-    .card {
+    .card-container {
         position: relative;
-        width: 800px;
-        height: 450px;
-        background: url('fan_card_bg.png') no-repeat center/cover;
-        border: 3px solid #0ff;
-        box-shadow: 0 0 20px #0ff;
-        overflow: hidden;
-        animation: glow 2s infinite alternate;
-    }
-
-    @keyframes glow {
-        from { box-shadow: 0 0 15px #0ff; }
-        to { box-shadow: 0 0 30px #ff0; }
-    }
-
-    .team-name {
-        position: absolute;
-        top: 20px;
-        left: 30px;
-        font-size: 24px;
-        font-weight: bold;
-        color: #0ff;
-        text-shadow: 0 0 8px #0ff;
-        animation: fadeIn 1s ease-in-out;
-    }
-
-    .player-name {
-        position: absolute;
-        bottom: 80px;
-        left: 30px;
-        font-size: 40px;
-        font-weight: bold;
-        text-transform: uppercase;
-        color: #fff;
-        text-shadow: 0 0 12px #ff0;
-        animation: fadeIn 1.5s ease-in-out;
-    }
-
-    .player-role {
-        position: absolute;
-        bottom: 40px;
-        left: 30px;
-        font-size: 20px;
-        font-weight: bold;
-        color: #0ff;
-        text-shadow: 0 0 6px #0ff;
-        animation: fadeIn 2s ease-in-out;
-    }
-
-    .team-logo {
-        position: absolute;
-        top: 70px;
-        left: 30px;
-        width: 100px;
-        height: 100px;
-        object-fit: contain;
-        animation: slideIn 1.5s ease-in-out;
-    }
-
-    .role-image {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        width: 50%;
-        opacity: 0.15;
-        pointer-events: none;
-        animation: fadeIn 2s ease-in-out;
-    }
-
-    .qr-code {
-        position: absolute;
-        bottom: 20px;
-        right: 20px;
-        width: 80px;
-        height: 80px;
-        border: 2px solid #0ff;
-        padding: 5px;
-        background: white;
+        display: inline-block;
+        width: 600px;
+        height: 350px;
+        background: url('cyberpunk_base.png') no-repeat center/cover;
+        box-shadow: 0 0 20px rgba(0,255,255,0.8);
         animation: pulse 2s infinite;
     }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateX(-20px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-
     @keyframes pulse {
-        0% { transform: scale(1); box-shadow: 0 0 10px #0ff; }
-        50% { transform: scale(1.05); box-shadow: 0 0 20px #ff0; }
-        100% { transform: scale(1); box-shadow: 0 0 10px #0ff; }
+        0%, 100% { box-shadow: 0 0 20px rgba(0,255,255,0.8); }
+        50% { box-shadow: 0 0 35px rgba(255,0,255,0.8); }
+    }
+    .overlay-text {
+        position: absolute;
+        color: white;
+        text-shadow: 0 0 5px cyan, 0 0 10px magenta;
+    }
+    .team-name {
+        top: 20px;
+        left: 40px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .player-name {
+        bottom: 70px;
+        left: 40px;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .role-name {
+        bottom: 40px;
+        left: 40px;
+        font-size: 20px;
+        font-style: italic;
+    }
+    .role-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0.15;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    .team-logo {
+        position: absolute;
+        top: 40px;
+        right: 40px;
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+    }
+    .qr-code {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        width: 60px;
+        height: 60px;
+    }
+    form {
+        margin-top: 20px;
+    }
+    input, select {
+        margin: 5px;
+        padding: 8px;
+        background: black;
+        border: 1px solid cyan;
+        color: white;
+        font-family: 'Orbitron', sans-serif;
     }
 </style>
 </head>
 <body>
 
-<div class="card">
-    <div class="team-name" id="teamName">VARANASI</div>
-    <img src="team_logo_1.png" class="team-logo" id="teamLogo">
-    <div class="player-name" id="playerName">AMARTYA</div>
-    <div class="player-role" id="playerRole">IGL</div>
-    <img src="role_4.png" class="role-image" id="roleImage">
-    <img src="qr.png" class="qr-code" id="qrCode">
+<h1>Cyberpunk Fan Card Generator</h1>
+
+<div class="card-container" id="fanCard">
+    <img id="roleImg" class="role-image" src="">
+    <div id="teamName" class="overlay-text team-name">TEAM NAME</div>
+    <div id="playerName" class="overlay-text player-name">PLAYER NAME</div>
+    <div id="roleName" class="overlay-text role-name">ROLE</div>
+    <img id="teamLogo" class="team-logo" src="">
+    <img id="qrCode" class="qr-code" src="">
 </div>
 
+<form id="cardForm">
+    <input type="text" id="inputPlayer" placeholder="Player Name">
+    <input type="text" id="inputRole" placeholder="Role">
+    <input type="text" id="inputTeam" placeholder="Team Name"><br>
+
+    Role Image: 
+    <select id="selectRoleImg">
+        <option value="role_entry.png">Entry Fragger</option>
+        <option value="role_igl.png">IGL</option>
+        <option value="role_awper.png">AWPer</option>
+        <option value="role_support.png">Support</option>
+    </select>
+
+    Team Logo:
+    <select id="selectTeamLogo">
+        <option value="team_varanasi.png">Varanasi</option>
+        <option value="team_kalinga.png">Kalinga Warriors</option>
+        <option value="team_srinagar.png">Srinagar’s SEN</option>
+        <option value="team_bengaluru.png">Bengaluru Titans</option>
+        <option value="team_delhi.png">Delhi Phantoms</option>
+        <option value="team_mumbai.png">Mumbai Mavericks</option>
+        <option value="team_kolkata.png">Kolkata Knights</option>
+        <option value="team_hyderabad.png">Hyderabad Hawks</option>
+        <option value="team_chennai.png">Chennai Cobras</option>
+        <option value="team_pune.png">Pune Panthers</option>
+        <option value="team_jaipur.png">Jaipur Jaguars</option>
+        <option value="team_lucknow.png">Lucknow Lions</option>
+        <option value="team_guwahati.png">Guwahati Guardians</option>
+        <option value="team_patiala.png">Patiala Predators</option>
+        <option value="team_meerut.png">Meerut Marauders</option>
+        <option value="team_agra.png">Agra Avengers</option>
+        <option value="team_indore.png">Indore Invincibles</option>
+        <option value="team_kanpur.png">Kanpur Kings</option>
+        <option value="team_bhopal.png">Bhopal Blazers</option>
+        <option value="team_surat.png">Surat Scorpions</option>
+    </select><br>
+
+    QR Code:
+    <input type="file" id="inputQR" accept="image/*"><br>
+
+    <button type="button" onclick="updateCard()">Update Card</button>
+</form>
+
 <script>
-    // Example of dynamically setting values
-    document.getElementById("playerName").innerText = "Amartya";
-    document.getElementById("playerRole").innerText = "IGL";
-    document.getElementById("teamName").innerText = "VARANASI";
-    document.getElementById("teamLogo").src = "team_logo_1.png";
-    document.getElementById("roleImage").src = "role_4.png";
-    document.getElementById("qrCode").src = "qr.png"; // your QR file
+function updateCard() {
+    document.getElementById('playerName').innerText = document.getElementById('inputPlayer').value || "PLAYER NAME";
+    document.getElementById('roleName').innerText = document.getElementById('inputRole').value || "ROLE";
+    document.getElementById('teamName').innerText = document.getElementById('inputTeam').value || "TEAM NAME";
+    
+    document.getElementById('roleImg').src = document.getElementById('selectRoleImg').value;
+    document.getElementById('teamLogo').src = document.getElementById('selectTeamLogo').value;
+
+    const qrFile = document.getElementById('inputQR').files[0];
+    if (qrFile) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('qrCode').src = e.target.result;
+        }
+        reader.readAsDataURL(qrFile);
+    }
+}
 </script>
 
 </body>
