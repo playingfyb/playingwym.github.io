@@ -83,3 +83,231 @@
 
   <div class="preview">
     <h3>Live Preview</h3>
+    <canvas id="cardCanvas" width="760" height="1080" aria-label="Fan card preview"></canvas>
+  </div>
+
+<script>
+// ---------- CONFIG ----------
+const YOUTUBE_LINK = "https://www.youtube.com/@UniversaLGCofficial";
+
+const ROLES = [
+  { file: "role_1.png", name: "IGL" },
+  { file: "role_2.png", name: "Supporter / Filter" },
+  { file: "role_3.png", name: "Entry Fragger" },
+  { file: "role_4.png", name: "AR" }
+];
+
+const TEAMS = [
+  { file: "team_logo_1.png",  name: "VARANASI" },
+  { file: "team_logo_2.png",  name: "KALINGA WARRIORS" },
+  { file: "team_logo_3.png",  name: "SRINAGAR'S SEN" },
+  { file: "team_logo_4.png",  name: "DELHI ASSAULTERS" },
+  { file: "team_logo_5.png",  name: "PATNA IDATENS" },
+  { file: "team_logo_6.png",  name: "AHMEDABAD KE DAKU" },
+  { file: "team_logo_7.png",  name: "HYDERABAD MAVERICKS" },
+  { file: "team_logo_8.png",  name: "BOMBAY TYRANTS" },
+  { file: "team_logo_9.png",  name: "TEAM LUCKNOW CITIZENS" },
+  { file: "team_logo_10.png", name: "INDORI BISCUITS" },
+  { file: "team_logo_11.png", name: "DONT PEEK JAIPUR" },
+  { file: "team_logo_12.png", name: "PTOWN" },
+  { file: "team_logo_13.png", name: "CHANDIGARH WARRIOR'S" },
+  { file: "team_logo_14.png", name: "KOLKATA GAMERS." },
+  { file: "team_logo_15.png", name: "SHIMLA SLEDGERS" },
+  { file: "team_logo_16.png", name: "GUWAHATI GUNSLINGERS" },
+  { file: "team_logo_17.png", name: "GOA CLASHERS" },
+  { file: "team_logo_18.png", name: "RUTHLESS THALAIVAS" },
+  { file: "team_logo_19.png", name: "LADAKH LEGENDS" },
+  { file: "team_logo_20.png", name: "BANGLORE BANDITS" }
+];
+
+// ---------- UI wiring ----------
+const roleSelect = document.getElementById('roleSelect');
+const teamSelect = document.getElementById('teamSelect');
+const nameInput = document.getElementById('nameInput');
+const generateBtn = document.getElementById('generateBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+
+ROLES.forEach(r => { const o = document.createElement('option'); o.value = r.file; o.textContent = r.name; roleSelect.appendChild(o); });
+TEAMS.forEach(t => { const o = document.createElement('option'); o.value = t.file; o.textContent = t.name; teamSelect.appendChild(o); });
+
+// ---------- Canvas & helpers ----------
+const canvas = document.getElementById('cardCanvas');
+const ctx = canvas.getContext('2d', { alpha:false });
+const W = canvas.width, H = canvas.height;
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+// load image promise
+function loadImage(src){
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => res(img);
+    img.onerror = () => rej(new Error('Failed to load ' + src));
+    img.src = src;
+  });
+}
+
+// background drawing similar to demo card
+function drawBackground(){
+  // gradient base
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#071225');
+  g.addColorStop(0.5,'#0e2a34');
+  g.addColorStop(1,'#061320');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+
+  // large grey body panel
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  roundRect(ctx, 60, 80, W-120, H-220, 18);
+  ctx.fill();
+
+  // orange inner frame where role image sits
+  ctx.fillStyle = '#f7a047';
+  roundRect(ctx, 120, 140, W-240, 520, 10);
+  ctx.fill();
+
+  // inner thin cream border
+  ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+  ctx.lineWidth = 3;
+  roundRect(ctx, 120, 140, W-240, 520, 10);
+  ctx.stroke();
+
+  // bottom panel for name/role/supporting
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
+  roundRect(ctx, 80, H-420, W-160, 300, 12);
+  ctx.fill();
+
+  // subtle divider line
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(90, H-310);
+  ctx.lineTo(W-90, H-310);
+  ctx.stroke();
+}
+
+// core render function
+async function renderCard(){
+  const nameRaw = (nameInput.value || '').trim();
+  const name = nameRaw ? nameRaw : 'PLAYER NAME';
+  const roleFile = roleSelect.value;
+  const roleObj = ROLES.find(r=>r.file===roleFile) || {name:''};
+  const roleName = roleObj.name || '';
+  const teamFile = teamSelect.value;
+  const teamObj = TEAMS.find(t=>t.file===teamFile) || {name:''};
+  const teamName = teamObj.name || '';
+
+  // background
+  drawBackground();
+
+  // draw role image into the orange box
+  try {
+    const roleImg = await loadImage('role_images/' + roleFile);
+    // fit into box (x=130,y=150,w=W-260,h=500)
+    const bx = 130, by = 150, bw = W-260, bh = 500;
+    let scale = Math.min(bw/roleImg.width, bh/roleImg.height);
+    let dw = Math.round(roleImg.width * scale), dh = Math.round(roleImg.height * scale);
+    let dx = bx + Math.round((bw-dw)/2), dy = by + Math.round((bh-dh)/2);
+    // draw it faint (slightly lower opacity overlay if desired)
+    ctx.save();
+    ctx.globalAlpha = 0.96; // slightly faint but still visible
+    ctx.drawImage(roleImg, dx, dy, dw, dh);
+    ctx.restore();
+  } catch(e){
+    console.warn('role image not found', e);
+    ctx.fillStyle = 'rgba(255,255,255,0.02)';
+    roundRect(ctx, 130, 150, W-260, 500, 10);
+    ctx.fill();
+  }
+
+  // NAME (left)
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#cfdde6';
+  ctx.font = '600 28px Inter, Arial';
+  ctx.fillText('Name:', 100, H - 320);
+  ctx.font = '800 36px Inter, Arial';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(name.toUpperCase(), 100, H - 280);
+
+  // ROLE (right)
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#cfdde6';
+  ctx.font = '700 24px Inter, Arial';
+  ctx.fillText('Role:', W - 100, H - 320);
+  ctx.font = '800 28px Inter, Arial';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(roleName.toUpperCase(), W - 100, H - 280);
+
+  // TEAM label + logo (left bottom)
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#cfe0ea';
+  ctx.font = '700 20px Inter, Arial';
+  ctx.fillText('Team:', 100, H - 200);
+
+  try {
+    const teamImg = await loadImage('team_logos/images/' + teamFile);
+    const tw = 120, th = 120;
+    ctx.drawImage(teamImg, 100, H - 180, tw, th);
+    // team name to the right of logo
+    ctx.font = '700 20px Inter, Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(teamName, 240, H - 130);
+  } catch(e){
+    // placeholder box if missing
+    ctx.fillStyle = 'rgba(255,255,255,0.02)';
+    roundRect(ctx, 100, H - 180, 120, 120, 10);
+    ctx.fill();
+    ctx.font = '700 18px Inter, Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(teamName || 'No team selected', 240, H - 130);
+  }
+
+  // QR scanner (small) bottom-right
+  try {
+    const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=" + encodeURIComponent(YOUTUBE_LINK);
+    const qrImg = await loadImage(qrUrl);
+    const qrW = 110;
+    ctx.drawImage(qrImg, W - 100 - qrW, H - 120 - qrW, qrW, qrW);
+    // small label
+    ctx.font = '600 12px Inter, Arial';
+    ctx.fillStyle = '#a9b7c3';
+    ctx.textAlign = 'center';
+    ctx.fillText('Scan → Live', W - 100 - qrW/2, H - 20);
+  } catch(e){
+    console.warn('QR generation failed', e);
+  }
+
+  // footer watermark
+  ctx.font = '600 12px Inter, Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.04)';
+  ctx.textAlign = 'center';
+  ctx.fillText('Fan-made • UniversaLGCofficial', W/2, H - 8);
+}
+
+// ---------- interactions ----------
+generateBtn.addEventListener('click', renderCard);
+nameInput.addEventListener('input', renderCard);
+roleSelect.addEventListener('change', renderCard);
+teamSelect.addEventListener('change', renderCard);
+
+downloadBtn.addEventListener('click', async () => {
+  await renderCard();
+  const dataUrl = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = 'fan_card.png';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+});
+
+// initial defaults & render
+window.addEventListener('load', () => {
+  roleSelect.selectedIndex = 0;
+  teamSelect.selectedIndex = 14; // default to SHIMLA SLEDGERS (index 14 -> team_logo_15)
+  renderCard();
+});
+</script>
+</body>
+</html>
