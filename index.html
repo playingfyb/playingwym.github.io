@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fan Card Generator</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    .form { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; }
+    .card-preview { margin-top: 20px; text-align: center; }
+    canvas { border: 1px solid #ccc; }
+    select, input, button { width: 100%; padding: 10px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <div class="form">
+    <h2>Create Your Fan Card</h2>
+    <input type="text" id="name" placeholder="Enter your name" />
+    <input type="text" id="username" placeholder="Enter your username" />
+
+    <select id="role">
+      <option value="igl">IGL</option>
+      <option value="support">Supporter/Filter</option>
+      <option value="entry">Entry Fragger</option>
+      <option value="ar">AR</option>
+    </select>
+
+    <select id="team">
+      <option value="team_logo_1.png">Team 1</option>
+      <option value="team_logo_2.png">Team 2</option>
+      <option value="team_logo_3.png">Team 3</option>
+      <!-- Add more teams as needed -->
+    </select>
+
+    <button onclick="generateCard()">Generate Fan Card</button>
+  </div>
+
+  <div class="card-preview">
+    <canvas id="cardCanvas" width="600" height="800"></canvas>
+    <br>
+    <button onclick="downloadCard()">Download Card</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    const roleImages = {
+      igl: "role_images/role_1.png",
+      support: "role_images/role_2.png",
+      entry: "role_images/role_3.png",
+      ar: "role_images/role_4.png"
+    };
+
+    async function generateCard() {
+      const name = document.getElementById('name').value;
+      const username = document.getElementById('username').value;
+      const role = document.getElementById('role').value;
+      const teamLogo = document.getElementById('team').value;
+
+      const canvas = document.getElementById('cardCanvas');
+      const ctx = canvas.getContext('2d');
+
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#333";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw role image
+      const roleImg = new Image();
+      roleImg.src = roleImages[role];
+      roleImg.onload = () => {
+        ctx.drawImage(roleImg, 100, 50, 400, 400);
+
+        // Draw name and username
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial";
+        ctx.fillText(`Name: ${name}`, 50, 500);
+        ctx.fillText(`Username: ${username}`, 50, 540);
+
+        // Draw team logo
+        const teamImg = new Image();
+        teamImg.src = `team_logos/images/${teamLogo}`;
+        teamImg.onload = () => {
+          ctx.drawImage(teamImg, 400, 500, 150, 150);
+
+          // Generate QR Code for YouTube
+          QRCode.toDataURL("https://www.youtube.com/@UniversaLGCofficial")
+            .then(url => {
+              const qrImg = new Image();
+              qrImg.src = url;
+              qrImg.onload = () => {
+                ctx.drawImage(qrImg, 50, 600, 100, 100);
+              }
+            });
+        };
+      };
+    }
+
+    function downloadCard() {
+      const canvas = document.getElementById('cardCanvas');
+      const link = document.createElement('a');
+      link.download = 'fan_card.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  </script>
+</body>
+</html>
