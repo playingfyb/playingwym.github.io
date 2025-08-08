@@ -4,104 +4,107 @@
   <meta charset="UTF-8">
   <title>Fan Card Generator</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    canvas { border: 1px solid #000; margin-top: 20px; }
-    select, button { margin: 10px; padding: 10px; font-size: 16px; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #222;
+      color: white;
+    }
+    #card {
+      position: relative;
+      width: 400px;
+      height: 550px;
+      margin: 20px auto;
+      background: url('fan_card_template.jpg'); /* Replace with your base card template */
+      background-size: cover;
+      background-position: center;
+    }
+    #roleImg, #teamLogo, #qrCode {
+      position: absolute;
+      object-fit: contain;
+    }
+    #roleImg {
+      top: 75px;
+      left: 60px;
+      width: 280px;
+      height: 300px;
+    }
+    #teamLogo {
+      bottom: 90px;
+      left: 150px;
+      width: 100px;
+    }
+    #qrCode {
+      width: 60px;
+      bottom: 10px;
+      right: 10px;
+    }
+    #nameField, #roleText {
+      position: absolute;
+      color: white;
+      font-weight: bold;
+    }
+    #nameField {
+      bottom: 155px;
+      left: 50px;
+      font-size: 16px;
+    }
+    #roleText {
+      bottom: 155px;
+      right: 50px;
+      font-size: 16px;
+    }
+    input, select, button {
+      margin: 10px;
+    }
   </style>
 </head>
 <body>
   <h1>Fan Card Generator</h1>
 
-  <label for="role">Choose Role:</label>
-  <select id="role"></select>
+  <div>
+    <input type="text" id="nameInput" placeholder="Enter Name">
+    <select id="roleSelect">
+      <option value="role_1.png">Sniper</option>
+      <option value="role_2.png">Entry Fragger</option>
+      <option value="role_3.png">Support</option>
+      <option value="role_4.png">IGL</option>
+      <!-- Add more roles -->
+    </select>
+    <select id="teamSelect">
+      <option value="team_logo_1.png">VARANASI</option>
+      <option value="team_logo_2.png">KALINGA WARRIORS</option>
+      <!-- Add more teams -->
+    </select>
+    <button onclick="generateCard()">Generate Card</button>
+  </div>
 
-  <label for="team">Choose Team:</label>
-  <select id="team"></select>
-
-  <button onclick="generateCard()">Generate Fan Card</button>
-  <button onclick="downloadCard()">Download</button>
-
-  <canvas id="fanCanvas" width="600" height="400"></canvas>
+  <div id="card">
+    <img id="roleImg" src="" alt="Role">
+    <img id="teamLogo" src="" alt="Team Logo">
+    <img id="qrCode" src="qr_code.png" alt="QR Code"> <!-- Replace with your YouTube QR -->
+    <div id="nameField"></div>
+    <div id="roleText"></div>
+  </div>
 
   <script>
-    // Roles
-    const roles = [
-      { file: "role_1.png", name: "IGL" },
-      { file: "role_2.png", name: "Supporter / Filter" },
-      { file: "role_3.png", name: "Entry Fragger" },
-      { file: "role_4.png", name: "AR" }
-    ];
-
-    // Teams
-    const teams = [
-      { file: "team_logo_1.png", name: "VARANASI" },
-      { file: "team_logo_2.png", name: "KALINGA WARRIORS" },
-      { file: "team_logo_3.png", name: "SRINAGAR'S SEN" },
-      { file: "team_logo_4.png", name: "DELHI ASSAULTERS" },
-      { file: "team_logo_5.png", name: "PATNA IDATENS" },
-      { file: "team_logo_6.png", name: "AHMEDABAD KE DAKU" },
-      { file: "team_logo_7.png", name: "HYDERABAD MAVERICKS" },
-      { file: "team_logo_8.png", name: "BOMBAY TYRANTS" },
-      { file: "team_logo_9.png", name: "TEAM LUCKNOW CITIZENS" },
-      { file: "team_logo_10.png", name: "INDORI BISCUITS" },
-      { file: "team_logo_11.png", name: "DONT PEEK JAIPUR" },
-      { file: "team_logo_12.png", name: "PTOWN" },
-      { file: "team_logo_13.png", name: "CHANDIGARH WARRIOR'S" },
-      { file: "team_logo_14.png", name: "KOLKATA GAMERS." },
-      { file: "team_logo_15.png", name: "SHIMLA SLEDGERS" },
-      { file: "team_logo_16.png", name: "GUWAHATI GUNSLINGERS" },
-      { file: "team_logo_17.png", name: "GOA CLASHERS" },
-      { file: "team_logo_18.png", name: "RUTHLESS THALAIVAS" },
-      { file: "team_logo_19.png", name: "LADAKH LEGENDS" },
-      { file: "team_logo_20.png", name: "BANGLORE BANDITS" }
-    ];
-
-    const roleSelect = document.getElementById('role');
-    const teamSelect = document.getElementById('team');
-
-    roles.forEach(role => {
-      const opt = document.createElement('option');
-      opt.value = role.file;
-      opt.textContent = role.name;
-      roleSelect.appendChild(opt);
-    });
-
-    teams.forEach(team => {
-      const opt = document.createElement('option');
-      opt.value = team.file;
-      opt.textContent = team.name;
-      teamSelect.appendChild(opt);
-    });
+    const roleMap = {
+      "role_1.png": "Sniper",
+      "role_2.png": "Entry Fragger",
+      "role_3.png": "Support",
+      "role_4.png": "IGL"
+      // Extend with more roles
+    };
 
     function generateCard() {
-      const canvas = document.getElementById('fanCanvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const name = document.getElementById('nameInput').value;
+      const roleFile = document.getElementById('roleSelect').value;
+      const teamFile = document.getElementById('teamSelect').value;
 
-      const roleImage = new Image();
-      const teamLogo = new Image();
-      const qrCode = new Image();
-
-      roleImage.src = `role_images/${roleSelect.value}`;
-      teamLogo.src = `team_logos/images/${teamSelect.value}`;
-      qrCode.src = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://www.youtube.com/@UniversaLGCofficial';
-
-      roleImage.onload = () => {
-        ctx.drawImage(roleImage, 0, 0, 600, 400);
-        teamLogo.onload = () => {
-          ctx.drawImage(teamLogo, 20, 20, 100, 100);
-          qrCode.onload = () => {
-            ctx.drawImage(qrCode, 480, 280, 100, 100);
-          };
-        };
-      };
-    }
-
-    function downloadCard() {
-      const link = document.createElement('a');
-      link.download = 'fan_card.png';
-      link.href = document.getElementById('fanCanvas').toDataURL();
-      link.click();
+      document.getElementById('roleImg').src = `roles/${roleFile}`;
+      document.getElementById('teamLogo').src = `logos/${teamFile}`;
+      document.getElementById('nameField').textContent = `Name: ${name}`;
+      document.getElementById('roleText').textContent = `Role: ${roleMap[roleFile]}`;
     }
   </script>
 </body>
