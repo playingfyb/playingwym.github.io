@@ -325,18 +325,6 @@ async function renderCard(){
     console.warn('team logo missing', e);
   }
 
-  
-  
-
-    // small label
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.font = '600 12px "Inter", Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Scan → Live', W - 60 - qrW/2, H - 20);
-  } catch(e){
-    console.warn('qr fail', e);
-  }
-
   // tiny footer watermark
   ctx.font = '600 12px "Inter", Arial';
   ctx.fillStyle = 'rgba(255,255,255,0.04)';
