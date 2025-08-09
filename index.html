@@ -378,3 +378,46 @@ window.addEventListener('load', () => {
 
 </body>
 </html>
+/* Remove any scanner/placeholder styles */
+.scanner, .scanner-placeholder {
+    display: none !important;
+}
+
+/* Info container divided equally */
+.info-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 80%;
+    margin: 0 auto;
+    position: relative;
+}
+
+.player-info, .role-info {
+    flex: 1;
+    text-align: center;
+}
+
+.divider {
+    width: 2px;
+    background-color: white;
+    height: 40px;
+}
+
+/* Team Logo Placement */
+.team-logo-container {
+    position: absolute;
+    top: 25%;
+    left: 5%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.team-logo-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
