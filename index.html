@@ -169,127 +169,79 @@ function roundRect(ctx,x,y,w,h,r, fill=true, stroke=false){
 /* ======================
    Main render function
    ====================== */
-async function renderCard(){
-  // inputs
-  const nameRaw = (nameInput.value||'').trim();
-  const displayName = nameRaw ? nameRaw.toUpperCase() : 'PLAYER NAME';
-  const roleFile = roleSelect.value;
-  const roleName = (ROLES.find(r=>r.file===roleFile)||{name:''}).name.toUpperCase();
-  const teamFile = teamSelect.value;
-  const teamName = (TEAMS.find(t=>t.file===teamFile)||{name:''}).name.toUpperCase();
+async function renderCard(playerName, role, roleImageSrc, teamLogoSrc) {
+    const canvas = document.getElementById('cardCanvas');
+    const ctx = canvas.getContext('2d');
 
-  // cleared background gradient
-  const g = ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#081324');
-  g.addColorStop(0.6,'#111b2b');
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,W,H);
+    const width = canvas.width;
+    const height = canvas.height;
 
-  // decorative neon border / frame
-  ctx.save();
-  ctx.strokeStyle = 'rgba(255,85,161,0.18)';
-  ctx.lineWidth = 8;
-  roundRect(ctx, 18, 18, W-36, H-36, 28, false, true);
-  ctx.restore();
+    // Clear
+    ctx.clearRect(0, 0, width, height);
 
-  // main role image area (big top area) - draw a slightly dark overlay rectangle first
-  const frameX = 60, frameY = 60, frameW = W - 120, frameH = 660;
-  // inner orange-ish band effect as in sample (subtle)
-  ctx.fillStyle = 'rgba(255,255,255,0.02)';
-  roundRect(ctx, frameX, frameY, frameW, frameH, 12, true, false);
+    // Gradient background (purple-pink like 2nd image)
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, "#3b0058");
+    gradient.addColorStop(1, "#8e00a8");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
 
-  // draw role image with low opacity and center-fit
-  try {
-    const roleImg = await loadImage('role_images/' + roleFile);
-    // compute scale to fit box with some bleed
-    const maxW = frameW - 30, maxH = frameH - 30;
-    const scale = Math.min(maxW/roleImg.width, maxH/roleImg.height);
-    const dw = roleImg.width * scale, dh = roleImg.height * scale;
-    const dx = Math.round(frameX + (frameW - dw)/2);
-    const dy = Math.round(frameY + (frameH - dh)/2);
-    ctx.save();
-    ctx.globalAlpha = 0.48; // LOW opacity as requested
-    ctx.drawImage(roleImg, dx, dy, dw, dh);
-    ctx.restore();
-  } catch(e){
-    // placeholder if missing
-    ctx.save();
-    ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    roundRect(ctx, frameX+8, frameY+8, frameW-16, frameH-16, 10, true, false);
-    ctx.restore();
-    console.warn(e);
-  }
-  // split line and name/role band under the character area
-  const bandY = frameY + frameH + 18;
-  // subtle translucent band
-  ctx.fillStyle = 'rgba(0,0,0,0.28)';
-  roundRect(ctx, frameX, bandY, frameW, 160, 6, true, false);
+    // Role image (low opacity in background)
+    if (roleImageSrc) {
+        const roleImg = new Image();
+        roleImg.onload = function () {
+            ctx.save();
+            ctx.globalAlpha = 0.25;
+            ctx.drawImage(roleImg, 0, 0, width, height);
+            ctx.restore();
+            drawTextAndLogo();
+        };
+        roleImg.src = roleImageSrc;
+    } else {
+        drawTextAndLogo();
+    }
 
-  // thin separator line
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(frameX + 30, bandY + 54);
-  ctx.lineTo(frameX + frameW - 30, bandY + 54);
-  ctx.stroke();
-  // Player Name (Upper Half)
-ctx.font = '800 36px "Inter", Arial';
-ctx.fillStyle = '#ffffff';
-ctx.textAlign = 'center';
-ctx.fillText(displayName, W / 2, bandY + 50);
+    function drawTextAndLogo() {
+        // Player Name
+        ctx.fillStyle = "white";
+        ctx.font = "bold 36px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(playerName.toUpperCase(), width / 2, height - 240);
 
-// Horizontal Divider Line
-ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-ctx.lineWidth = 2;
-ctx.beginPath();
-ctx.moveTo(W * 0.2, bandY + 65);   // Start a bit inside left edge
-ctx.lineTo(W * 0.8, bandY + 65);   // End a bit inside right edge
-ctx.stroke();
+        // Divider Line
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(width * 0.2, height - 230);
+        ctx.lineTo(width * 0.8, height - 230);
+        ctx.stroke();
 
-// Player Role (Lower Half)
-ctx.font = '600 28px "Inter", Arial';
-ctx.fillStyle = '#cccccc';
-ctx.textAlign = 'center';
-ctx.fillText(roleName || 'ROLE', W / 2, bandY + 90);
+        // Role
+        ctx.font = "bold 28px Arial";
+        ctx.fillText(role.toUpperCase(), width / 2, height - 200);
 
-  // create a second box above name for Team (as requested)
-  // We'll place the team box directly above the player name, small pills look
-  const teamBoxW = frameW - 160;
-  const teamBoxX = frameX + 80;
-  const teamBoxY = frameY + frameH - 40; // overlapping lower area of frame
-  ctx.fillStyle = 'rgba(255,255,255,0.04)';
-  roundRect(ctx, teamBoxX, teamBoxY, teamBoxW, 48, 10, true, false);
+        // Triangle area for logo
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(0, height);
+        ctx.lineTo(width, height);
+        ctx.lineTo(width / 2, height - 140);
+        ctx.closePath();
+        ctx.clip();
 
-  // team name (center-left in that box)
-  ctx.fillStyle = '#e6f1fb';
-  ctx.font = '700 18px "Inter", Arial';
-  ctx.textAlign = 'center';
- 
-  // Now draw the big triangular pocket below (the decorative triangle area) and place team logo inside
-  // Triangle coordinates for an inverted triangle centered
-  const triTopX = W/2, triTopY = bandY + 170 + 60; // top vertex towards center (adjust)
-  const triHeight = 380;
-  const triBaseY = triTopY + triHeight;
-  const triHalfBase = 260;
+        if (teamLogoSrc) {
+            const teamLogo = new Image();
+            teamLogo.onload = function () {
+                ctx.drawImage(teamLogo, width / 2 - 80, height - 160, 160, 160);
+                ctx.restore();
+            };
+            teamLogo.src = teamLogoSrc;
+        } else {
+            ctx.restore();
+        }
+    }
+}
 
-  // compute triangle points (pointing down)
-  const p1 = { x: W/2 - triHalfBase, y: triTopY }; // left
-  const p2 = { x: W/2 + triHalfBase, y: triTopY }; // right
-  const p3 = { x: W/2, y: triBaseY }; // bottom middle
-
-  ctx.save();
-  // draw triangle outline fill
-  ctx.fillStyle = '#2b0a33';
-  ctx.beginPath();
-  ctx.moveTo(p1.x, p1.y);
-  ctx.lineTo(p2.x, p2.y);
-  ctx.lineTo(p3.x, p3.y);
-  ctx.closePath();
-  ctx.fill();
-  // thin border
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
 
   // Inside the triangle we want to place the team logo clipped to a smaller central triangle (or rectangle clipped to triangle)
   // We'll create a clipping path equal to a smaller triangle inside and draw the team image centered inside.
