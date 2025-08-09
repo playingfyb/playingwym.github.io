@@ -1,77 +1,455 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cyberpunk Fan Card</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Fan Card Generator — GitHub-driven</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  body {
-    background: #111;
-    font-family: 'Segoe UI', sans-serif;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-  }
-  .card {
-    position: relative;
-    width: 800px;
-    height: 450px;
-    background: url('data:image/png;base64,PUT-YOUR-BASE64-IMAGE-HERE') no-repeat center/cover;
-    color: white;
-    overflow: hidden;
-  }
-  .team-name {
-    position: absolute;
-    top: 40px;
-    left: 50px;
-    font-size: 28px;
-    font-weight: bold;
-    color: #00f6ff;
-    text-shadow: 2px 2px 4px black;
-  }
-  .player-name {
-    position: absolute;
-    top: 90px;
-    left: 50px;
-    font-size: 36px;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px black;
-  }
-  .role {
-    position: absolute;
-    top: 140px;
-    left: 50px;
-    font-size: 24px;
-    color: #ff007c;
-    text-shadow: 2px 2px 4px black;
-  }
-  .team-logo {
-    position: absolute;
-    bottom: 40px;
-    right: 60px;
-    width: 100px;
-    height: 100px;
-    object-fit: contain;
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  }
-  .role-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.15;
-    object-fit: cover;
-  }
+  :root{--bg:#0b0b0d;--panel:#0f1720;--muted:#9aa6b2}
+  body{font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(#050507,#0b0b0d);color:#ecf0ff;margin:0;padding:18px}
+  .wrap{display:flex;gap:18px;align-items:flex-start}
+  .controls{width:360px;background:rgba(255,255,255,0.03);padding:14px;border-radius:10px}
+  label{display:block;font-size:13px;color:#cfd8e3;margin:10px 0 6px}
+  input[type=file]{display:block}
+  input[type=text],select{width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:#fff}
+  .row{display:flex;gap:8px}
+  .row> *{flex:1}
+  .small{width:64px}
+  canvas{background:#111;border-radius:8px;max-width:100%;height:auto;box-shadow:0 12px 36px rgba(0,0,0,0.6)}
+  .btn{display:inline-block;padding:10px 12px;border-radius:8px;background:#6b21a8;color:#fff;text-decoration:none;cursor:pointer;border:0}
+  .primary{background:#0ea5a4}
+  .hint{font-size:12px;color:#9aa6b2;margin-top:6px}
+  footer{margin-top:12px;color:#9aa6b2;font-size:13px}
+  .center{display:flex;align-items:center;justify-content:center}
+  .muted{color:#9aa6b2;font-size:13px}
 </style>
 </head>
 <body>
-<div class="card">
-  <img src="role-image.png" class="role-image" alt="Role Image">
-  <div class="team-name">Team Name</div>
-  <div class="player-name">Player Name</div>
-  <div class="role">Role</div>
-  <img src="team-logo.png" class="team-logo" alt="Team Logo">
-</div>
+  <h2>Fan Card Generator (GitHub-driven)</h2>
+  <div class="wrap">
+    <div class="controls">
+      <label>GitHub Repo</label>
+      <div class="row" style="margin-bottom:6px">
+        <input id="user" placeholder="username" value="playingfyb">
+        <input id="repo" placeholder="repo" value="playingwym.github.io">
+      </div>
+      <div class="hint">This app uses the GitHub Contents API to list `role_images` and `team_logos` directories in your repo.</div>
+
+      <label>Frame (optional)</label>
+      <input id="frameUpload" type="file" accept="image/*">
+      <div class="hint">If you have <code>frame.png</code> or <code>frame.jpg</code> in repo root, the page will try to use it. Otherwise upload here.</div>
+
+      <label style="margin-top:12px">Select Role (role image will be used)</label>
+      <select id="roleSelect"><option>Loading…</option></select>
+
+      <label style="margin-top:8px">Select Team (logo will be used)</label>
+      <select id="teamSelect"><option>Loading…</option></select>
+
+      <label style="margin-top:8px">Player name</label>
+      <input id="name" type="text" placeholder="Player name" value="PLAYER NAME">
+
+      <label style="margin-top:8px">Role label (displayed below name)</label>
+      <input id="roleLabel" type="text" value="ENTRY FRAGGER">
+
+      <label style="margin-top:8px">Role image opacity <span id="opLabel">75%</span></label>
+      <input id="opacity" type="range" min="30" max="100" value="75" style="width:100%">
+
+      <label style="margin-top:8px">Advanced offsets (px)</label>
+      <div class="row">
+        <input id="logoOffsetX" class="small" type="number" value="0" title="logo X offset">
+        <input id="logoOffsetY" class="small" type="number" value="0" title="logo Y offset">
+        <input id="textOffsetY" class="small" type="number" value="0" title="text Y offset">
+      </div>
+
+      <div style="margin-top:12px">
+        <button id="refreshBtn" class="btn">Refresh asset lists</button>
+        <button id="renderBtn" class="btn" style="margin-left:8px">Render</button>
+        <a id="download" class="btn primary" href="#" download="fan-card.png" style="margin-left:8px">Download PNG</a>
+      </div>
+
+      <div class="hint" style="margin-top:10px">If asset lists don't appear, make sure directories are named exactly <code>role_images</code> & <code>team_logos</code>.</div>
+
+      <footer>
+        <div class="muted">Hosted on GitHub Pages? Leave repo as-is — the app will read files directly from the repo.</div>
+      </footer>
+    </div>
+
+    <div style="flex:1;display:flex;flex-direction:column;gap:12px;align-items:center">
+      <div class="center" style="width:100%"><canvas id="c" width="720" height="1280"></canvas></div>
+      <div class="muted">Preview — adjust opacity, offsets and click <strong>Download PNG</strong></div>
+    </div>
+  </div>
+
+<script>
+/*
+  GitHub-driven Fan Card Generator
+  - Lists role images from repo/role_images and team logos from repo/team_logos using GitHub API
+  - Composites onto a frame (frame.png in repo root if present) or user-uploaded frame
+  - Places role art under frame with adjustable opacity; places circular team logo badge at bottom center
+  - Centers name inside yellow bar and draws role label below it
+*/
+
+const userInp = document.getElementById('user');
+const repoInp = document.getElementById('repo');
+const roleSel = document.getElementById('roleSelect');
+const teamSel = document.getElementById('teamSelect');
+const refreshBtn = document.getElementById('refreshBtn');
+const frameUpload = document.getElementById('frameUpload');
+const renderBtn = document.getElementById('renderBtn');
+const downloadBtn = document.getElementById('download');
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const opSlider = document.getElementById('opacity');
+const opLabel = document.getElementById('opLabel');
+const nameInp = document.getElementById('name');
+const roleLabelInp = document.getElementById('roleLabel');
+
+let repoUser = userInp.value.trim();
+let repoName = repoInp.value.trim();
+let frameImg = null;      // Image object for frame
+let frameFromUpload = null; // DataURL if user uploaded a frame
+let roleImages = [];      // {name, download_url}
+let teamLogos = [];       // {name, download_url}
+let roleImageObj = null;  // HTMLImageElement
+let logoImageObj = null;
+
+opSlider.addEventListener('input', ()=>{ opLabel.textContent = opSlider.value + '%'; render(); });
+
+userInp.addEventListener('change', ()=>{ repoUser = userInp.value.trim(); });
+repoInp.addEventListener('change', ()=>{ repoName = repoInp.value.trim(); });
+
+frameUpload.addEventListener('change', async (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const url = await fileToDataURL(f);
+  frameFromUpload = url;
+  frameImg = await loadImage(url);
+  adaptCanvasToFrame();
+  render();
+});
+
+refreshBtn.addEventListener('click', ()=> fetchRepoAssets().catch(e=>alert('Failed to fetch assets: '+e)));
+
+renderBtn.addEventListener('click', ()=> render());
+
+downloadBtn.addEventListener('click', ()=>{
+  const fname = (nameInp.value||'player').trim().replace(/\s+/g,'-').toLowerCase() + '-card.png';
+  downloadBtn.download = fname;
+});
+
+// helpers
+function fileToDataURL(file){
+  return new Promise((res, rej)=>{
+    const fr = new FileReader();
+    fr.onload = ()=> res(fr.result);
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
+  });
+}
+function loadImage(src){
+  return new Promise((res, rej)=>{
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = ()=> res(img);
+    img.onerror = (e)=> rej(e);
+    img.src = src;
+  });
+}
+
+// Fetch repo directory listing using GitHub contents API
+async function listDir(path){
+  const api = `https://api.github.com/repos/${encodeURIComponent(repoUser)}/${encodeURIComponent(repoName)}/contents/${encodeURIComponent(path)}`;
+  const res = await fetch(api);
+  if(!res.ok) throw new Error(`${res.status} ${res.statusText} when listing ${path}`);
+  const json = await res.json();
+  // return files that are images
+  return json.filter(f => f.type === 'file' && /\.(png|jpe?g|gif|webp|svg)$/i.test(f.name))
+             .map(f => ({name: f.name, download_url: f.download_url}));
+}
+
+async function fetchRepoAssets(){
+  // read role_images and team_logos directories
+  try{
+    roleImages = await listDir('role_images');
+    teamLogos = await listDir('team_logos');
+  }catch(err){
+    console.warn('Error listing directories', err);
+    throw err;
+  }
+  // populate selects
+  populateSelect(roleSel, roleImages);
+  populateSelect(teamSel, teamLogos);
+  // try load frame from repo root (frame.png/jpg)
+  const tryFrame = await tryLoadFrameFromRepo();
+  if(tryFrame) {
+    frameImg = tryFrame;
+    adaptCanvasToFrame();
+  }
+}
+
+function populateSelect(selectEl, arr){
+  selectEl.innerHTML = '';
+  if(!arr || arr.length === 0){ selectEl.innerHTML = '<option>(empty)</option>'; return; }
+  arr.forEach((f,i)=> {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = f.name.replace(/\.(png|jpe?g|webp)$/i,'');
+    selectEl.appendChild(opt);
+  });
+  // load first by default
+  if(arr.length) {
+    if(selectEl === roleSel) loadRoleImageByIndex(0);
+    if(selectEl === teamSel) loadLogoByIndex(0);
+  }
+}
+
+async function tryLoadFrameFromRepo(){
+  const candidates = ['frame.png','frame.jpg','frame.jpeg','base.png','base.jpg','purple-card.png'];
+  for(const name of candidates){
+    const raw = `https://raw.githubusercontent.com/${repoUser}/${repoName}/main/${name}`;
+    try{
+      const img = await loadImage(raw);
+      return img;
+    }catch(e){}
+  }
+  return null;
+}
+
+async function loadRoleImageByIndex(idx){
+  if(!roleImages[idx]) return;
+  roleImageObj = await loadImage(roleImages[idx].download_url);
+  render();
+}
+async function loadLogoByIndex(idx){
+  if(!teamLogos[idx]) return;
+  logoImageObj = await loadImage(teamLogos[idx].download_url);
+  render();
+}
+
+roleSel.addEventListener('change', ()=> {
+  const idx = parseInt(roleSel.value,10);
+  loadRoleImageByIndex(idx).catch(e=>console.warn(e));
+});
+teamSel.addEventListener('change', ()=> {
+  const idx = parseInt(teamSel.value,10);
+  loadLogoByIndex(idx).catch(e=>console.warn(e));
+});
+
+// if user supplies custom repo index mapping, they could add a teams.json/roles.json — but this dynamic listing avoids that need.
+
+// Canvas composition — tuned to your purple card layout proportions (adjust if needed)
+function adaptCanvasToFrame(){
+  if(!frameImg) return;
+  // set canvas to frame size (cap displayed size using CSS)
+  canvas.width = frameImg.naturalWidth || frameImg.width;
+  canvas.height = frameImg.naturalHeight || frameImg.height;
+  // keep preview max width for practical display (CSS handles scaling)
+}
+
+// draw role image (under frame), cover the central art area
+function drawRoleImage(){
+  if(!roleImageObj) return;
+  const W = canvas.width, H = canvas.height;
+  // central art bounding box - tuned to your design percentages
+  const left = 0.08 * W, top = 0.06 * H, width = 0.84 * W, height = 0.58 * H;
+  // cover-fit behavior
+  const scale = Math.max(width / roleImageObj.width, height / roleImageObj.height);
+  const dw = Math.round(roleImageObj.width * scale);
+  const dh = Math.round(roleImageObj.height * scale);
+  const dx = Math.round(left + (width - dw)/2);
+  const dy = Math.round(top + (height - dh)/2);
+
+  ctx.save();
+  ctx.globalAlpha = parseInt(opSlider.value,10)/100;
+  ctx.drawImage(roleImageObj, dx, dy, dw, dh);
+  ctx.restore();
+}
+
+function drawFrame(){
+  if(!frameImg) {
+    // placeholder gray background
+    ctx.fillStyle = '#0f1720';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    return;
+  }
+  ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+}
+
+// draw player name centered on yellow bar and role label beneath
+function drawTextLayers(){
+  if(!frameImg) return;
+  const W = canvas.width, H = canvas.height;
+  const barLeft = 0.10 * W, barRight = 0.90 * W;
+  const barTop = 0.60 * H, barBottom = 0.67 * H;
+  const barHeight = barBottom - barTop;
+
+  // Repaint the yellow bar using sample from frame so it's crisp (optional)
+  // Extract a pixel within the original bar to copy exact color
+  // We keep the frame on top, but drawing text ensures legibility
+
+  // NAME
+  const name = (nameInp.value || 'PLAYER NAME').toUpperCase();
+  const nameSize = Math.round(barHeight * 0.55);
+  ctx.font = `bold ${nameSize}px Inter, Arial, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Position
+  const x = W/2;
+  const y = (barTop + barBottom)/2 + parseInt(document.getElementById('textOffsetY').value||0,10);
+
+  // Shadow for contrast
+  ctx.fillStyle = 'rgba(0,0,0,0.32)';
+  ctx.fillText(name, x, y + Math.max(1, Math.round(nameSize*0.06)));
+  // Main text (black over yellow is better; but white may be used depending on design — we'll use black to match sample)
+  ctx.fillStyle = '#000';
+  ctx.fillText(name, x, y);
+
+  // ROLE label (smaller, below bar)
+  const roleText = (roleLabelInp.value || '').toUpperCase();
+  const roleSize = Math.round(barHeight * 0.40);
+  ctx.font = `600 ${roleSize}px Inter, Arial, sans-serif`;
+  ctx.fillStyle = '#fff';
+  const roleY = Math.round(barBottom + roleSize * 0.9);
+  ctx.fillText(roleText, x, roleY);
+}
+
+// draw circular team logo badge
+function drawTeamLogo(){
+  const W = canvas.width, H = canvas.height;
+  const cx = Math.round(W * 0.5 + (parseInt(document.getElementById('logoOffsetX').value||0,10)));
+  const cy = Math.round(H * 0.86 + (parseInt(document.getElementById('logoOffsetY').value||0,10)));
+  const radius = Math.round(W * 0.06);
+
+  // cover/remove diamond remnants if frame contains them by drawing a filled circle background sampled from frame
+  if(frameImg){
+    // sample average nearby color
+    try{
+      // sample pixel from frame just above the diamond to blend
+      // (fast approximation: use ctx getImageData)
+      const px = Math.max(0, cx);
+      const py = Math.max(0, Math.min(canvas.height-1, cy));
+      // We'll just draw the badge background as semi-opaque to mask old diamond lines
+      ctx.beginPath();
+      ctx.arc(cx, cy, Math.round(radius*1.05), 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(20,20,20,0.82)';
+      ctx.fill();
+    }catch(e){}
+  } else {
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.round(radius*1.05), 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    ctx.fill();
+  }
+
+  // draw logo if available, clipped to circle
+  if(logoImageObj){
+    // compute target d inside circle (80% diameter)
+    const targetD = Math.round(radius * 1.6);
+    const scale = Math.min(targetD / logoImageObj.width, targetD / logoImageObj.height);
+    const dw = Math.round(logoImageObj.width * scale);
+    const dh = Math.round(logoImageObj.height * scale);
+    const dx = cx - Math.round(dw/2);
+    const dy = cy - Math.round(dh/2);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.round(radius*0.95), 0, Math.PI*2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(logoImageObj, dx, dy, dw, dh);
+    ctx.restore();
+
+    // outline
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.round(radius*0.95), 0, Math.PI*2);
+    ctx.lineWidth = Math.max(2, Math.round(radius*0.12));
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    ctx.stroke();
+  } else {
+    // placeholder ring
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.round(radius*0.95), 0, Math.PI*2);
+    ctx.lineWidth = Math.max(2, Math.round(radius*0.12));
+    ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+    ctx.stroke();
+  }
+}
+
+// main render
+async function render(){
+  // ensure repo user/name updated
+  repoUser = userInp.value.trim();
+  repoName = repoInp.value.trim();
+
+  // if selects are empty, try fetch
+  if((!roleImages.length || !teamLogos.length) && repoUser && repoName){
+    try{ await fetchRepoAssets(); }catch(e){ console.warn('asset fetch failed', e); }
+  }
+
+  // clear
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // draw role image under everything
+  drawRoleImage();
+
+  // draw frame (if frameImg loaded) on top
+  drawFrame();
+
+  // ensure role/ logo objects are kept in sync with selects
+  const roleIdx = parseInt(roleSel.value,10);
+  const teamIdx = parseInt(teamSel.value,10);
+  if(!isNaN(roleIdx) && roleImages[roleIdx] && !roleImageObj){
+    try{ roleImageObj = await loadImage(roleImages[roleIdx].download_url);}catch(e){}
+  }
+  if(!isNaN(teamIdx) && teamLogos[teamIdx] && !logoImageObj){
+    try{ logoImageObj = await loadImage(teamLogos[teamIdx].download_url);}catch(e){}
+  }
+
+  // draw text (on top of frame so it shows clean)
+  drawTextLayers();
+
+  // draw circular team logo badge (top-most)
+  drawTeamLogo();
+
+  // update download link
+  downloadBtn.href = canvas.toDataURL('image/png');
+}
+
+// initial quick attempt to fetch repo assets automatically
+fetchRepoAssets().catch(()=>{/* ignore on load */});
+
+// also load when page loads frame from repo if available
+tryLoadFrameFromRepo().then(img=>{
+  if(img){ frameImg = img; adaptCanvasToFrame(); render(); }
+}).catch(()=>{ /* not found — user can upload */ })
+
+// load role/logo when selects change but also allow initial selection
+roleSel.addEventListener('change', async ()=> {
+  const idx = parseInt(roleSel.value,10);
+  if(isNaN(idx)) return;
+  roleImageObj = null;
+  await loadRemoteIfExists(roleImages[idx]);
+  render();
+});
+teamSel.addEventListener('change', async ()=> {
+  const idx = parseInt(teamSel.value,10);
+  if(isNaN(idx)) return;
+  logoImageObj = null;
+  await loadRemoteIfExists(teamLogos[idx]);
+  render();
+});
+
+async function loadRemoteIfExists(obj){
+  if(!obj) return;
+  try{
+    const img = await loadImage(obj.download_url);
+    if(obj === roleImages[roleSel.value]) roleImageObj = img;
+    else logoImageObj = img;
+  }catch(e){ console.warn('failed loading', obj, e); }
+}
+
+</script>
 </body>
 </html>
