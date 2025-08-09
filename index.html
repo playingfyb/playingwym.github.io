@@ -219,25 +219,26 @@ async function renderCard(){
     ctx.restore();
     console.warn(e);
   }
-  // Player Name (Upper Half)
-ctx.font = '800 36px "Inter", Arial';
-ctx.fillStyle = '#ffffff';
-ctx.textAlign = 'center';
-ctx.fillText(displayName, W / 2, bandY + 50);
+  // split line and name/role band under the character area
+  const bandY = frameY + frameH + 18;
+  // subtle translucent band
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  roundRect(ctx, frameX, bandY, frameW, 160, 6, true, false);
 
-// Horizontal Divider Line
-ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-ctx.lineWidth = 2;
-ctx.beginPath();
-ctx.moveTo(W * 0.2, bandY + 65);   // Start a bit inside left edge
-ctx.lineTo(W * 0.8, bandY + 65);   // End a bit inside right edge
-ctx.stroke();
+  // thin separator line
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(frameX + 30, bandY + 54);
+  ctx.lineTo(frameX + frameW - 30, bandY + 54);
+  ctx.stroke();
 
-// Player Role (Lower Half)
-ctx.font = '600 28px "Inter", Arial';
-ctx.fillStyle = '#cccccc';
-ctx.textAlign = 'center';
-ctx.fillText(roleName || 'ROLE', W / 2, bandY + 90);
+  // Player name (large, centered)
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '800 46px "Inter", Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(displayName, W/2, bandY + 44);
+
   // Role subtitle (under name)
   ctx.fillStyle = 'rgba(255,255,255,0.95)';
   ctx.font = '700 34px "Inter", Arial';
