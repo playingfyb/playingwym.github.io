@@ -233,25 +233,17 @@ async function renderCard(){
   ctx.moveTo(frameX + 30, bandY + 54);
   ctx.lineTo(frameX + frameW - 30, bandY + 54);
   ctx.stroke();
-  // Player Name (top)
-ctx.font = '800 36px "Inter", Arial';
-ctx.fillStyle = '#ffffff';
-ctx.textAlign = 'center';
-ctx.fillText(displayName, W / 2, bandY + 60);
 
-// Horizontal divider
-ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-ctx.lineWidth = 2;
-ctx.beginPath();
-ctx.moveTo(W / 4, bandY + 80);
-ctx.lineTo((W / 4) * 3, bandY + 80);
-ctx.stroke();
+  // Player name (large, centered)
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '800 46px "Inter", Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(displayName, W/2, bandY + 44);
 
-// Player Role (below divider)
-ctx.font = '700 28px "Inter", Arial';
-ctx.fillText(roleName || 'ROLE', W / 2, bandY + 110);
-
- 
+  // Role subtitle (under name)
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.font = '700 34px "Inter", Arial';
+  ctx.fillText(roleName || 'ROLE', W/2, bandY + 100);
 
   // create a second box above name for Team (as requested)
   // We'll place the team box directly above the player name, small pills look
@@ -265,7 +257,8 @@ ctx.fillText(roleName || 'ROLE', W / 2, bandY + 110);
   ctx.fillStyle = '#e6f1fb';
   ctx.font = '700 18px "Inter", Arial';
   ctx.textAlign = 'center';
- 
+  ctx.fillText(teamName || 'TEAM NAME', W/2, teamBoxY + 32);
+
   // Now draw the big triangular pocket below (the decorative triangle area) and place team logo inside
   // Triangle coordinates for an inverted triangle centered
   const triTopX = W/2, triTopY = bandY + 170 + 60; // top vertex towards center (adjust)
@@ -332,6 +325,14 @@ ctx.fillText(roleName || 'ROLE', W / 2, bandY + 110);
     ctx.restore();
     console.warn('team logo missing', e);
   }
+
+  // small QR bottom-right
+  try {
+    const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(YOUTUBE_LINK);
+    const qrImg = await loadImage(qrUrl);
+    const qrW = 120;
+    ctx.drawImage(qrImg, W - 60 - qrW, H - 60 - qrW, qrW, qrW);
+
     // small label
     ctx.fillStyle = 'rgba(255,255,255,0.7)';
     ctx.font = '600 12px "Inter", Arial';
