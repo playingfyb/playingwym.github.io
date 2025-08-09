@@ -3,116 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fan Card</title>
+<title>Fan Card Generator</title>
 <style>
     body {
+        font-family: Arial, sans-serif;
         background: #111;
         color: white;
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+        text-align: center;
     }
     .card {
-        position: relative;
         width: 600px;
         height: 350px;
-        background-color: #222;
+        margin: 20px auto;
+        position: relative;
+        background: #1a1a1a;
         overflow: hidden;
         border-radius: 15px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.5);
     }
-    .bg-role {
+    .role-image {
         position: absolute;
-        top: 0;
-        left: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        opacity: 0.15;
+        opacity: 0.2;
+        z-index: 0;
     }
-    .player-name, .player-role {
+    .team-logo {
         position: absolute;
-        width: 90%;
-        left: 5%;
-        text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        bottom: 15px;
+        right: 15px;
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        background: white;
+        padding: 5px;
+        border-radius: 10px;
+        z-index: 2;
     }
     .player-name {
-        top: 45%;
-        font-size: clamp(1.5rem, 5vw, 3rem);
+        position: absolute;
+        top: 40%;
+        width: 100%;
+        font-size: 40px;
         font-weight: bold;
+        z-index: 1;
     }
     .player-role {
-        top: 60%;
-        font-size: clamp(1rem, 3vw, 1.5rem);
-        font-weight: bold;
-    }
-    .triangle-logo {
         position: absolute;
-        top: 0;
-        right: 0;
-        width: 0;
-        height: 0;
-        border-left: 150px solid transparent;
-        border-bottom: 150px solid transparent;
-        overflow: hidden;
-    }
-    .triangle-logo img {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 150px;
-        height: 150px;
-        object-fit: contain;
+        top: 55%;
+        width: 100%;
+        font-size: 22px;
+        color: #ccc;
+        z-index: 1;
     }
     .controls {
-        position: absolute;
-        bottom: -100px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 10px;
+        margin-top: 20px;
+    }
+    input, select {
+        padding: 8px;
+        margin: 5px;
     }
 </style>
 </head>
 <body>
 
-<div class="card">
-    <img id="bgRoleImg" class="bg-role" src="roles/role_1.png">
-    <div class="triangle-logo">
-        <img id="teamLogo" src="team_logos/team_logo_1.png">
-    </div>
+<h2>Fan Card Generator</h2>
+
+<div class="card" id="fanCard">
+    <img id="roleImage" class="role-image" src="" alt="Role Image">
     <div id="playerName" class="player-name">PLAYER NAME</div>
     <div id="playerRole" class="player-role">ROLE</div>
+    <img id="teamLogo" class="team-logo" src="" alt="Team Logo">
+</div>
 
-    <div class="controls">
-        <input type="text" id="nameInput" placeholder="Player Name">
-        <select id="roleSelect">
-            <option value="role_1.png">Role 1</option>
-            <option value="role_2.png">Role 2</option>
-        </select>
-        <select id="teamSelect">
-            <option value="team_logo_1.png">Team 1</option>
-            <option value="team_logo_2.png">Team 2</option>
-        </select>
-        <button onclick="updateCard()">Update</button>
-    </div>
+<div class="controls">
+    <input type="text" id="nameInput" placeholder="Enter Player Name">
+    <select id="roleSelect">
+        <option value="">Select Role</option>
+        <option value="IGL">IGL</option>
+        <option value="Entry Fragger">Entry Fragger</option>
+        <option value="Support">Support</option>
+        <option value="Assaulter">Assaulter</option>
+    </select>
+    <select id="roleImageSelect">
+        <option value="">Select Role Image</option>
+        <option value="https://playingfyb.github.io/playingwym.github.io/role_images/role_1.png">Role 1</option>
+        <option value="https://playingfyb.github.io/playingwym.github.io/role_images/role_2.png">Role 2</option>
+        <option value="https://playingfyb.github.io/playingwym.github.io/role_images/role_3.png">Role 3</option>
+        <option value="https://playingfyb.github.io/playingwym.github.io/role_images/role_4.png">Role 4</option>
+    </select>
+    <select id="teamLogoSelect">
+        <option value="">Select Team Logo</option>
+        <option value="https://playingfyb.github.io/playingwym.github.io/team_logos/images/team_logo_1.png">Team 1</option>
+        <option value="https://playingfyb.github.io/playingwym.github.io/team_logos/images/team_logo_2.png">Team 2</option>
+    </select>
 </div>
 
 <script>
-function updateCard() {
-    document.getElementById("playerName").innerText = document.getElementById("nameInput").value;
-    let roleFile = document.getElementById("roleSelect").value;
-    document.getElementById("bgRoleImg").src = "roles/" + roleFile;
-    document.getElementById("playerRole").innerText = roleFile.split('.')[0].replace('_',' ').toUpperCase();
-    let teamFile = document.getElementById("teamSelect").value;
-    document.getElementById("teamLogo").src = "team_logos/" + teamFile;
-}
+    document.getElementById("nameInput").addEventListener("input", function() {
+        document.getElementById("playerName").innerText = this.value || "PLAYER NAME";
+    });
+
+    document.getElementById("roleSelect").addEventListener("change", function() {
+        document.getElementById("playerRole").innerText = this.value || "ROLE";
+    });
+
+    document.getElementById("roleImageSelect").addEventListener("change", function() {
+        document.getElementById("roleImage").src = this.value || "";
+    });
+
+    document.getElementById("teamLogoSelect").addEventListener("change", function() {
+        document.getElementById("teamLogo").src = this.value || "";
+    });
 </script>
 
 </body>
 </html>
-
