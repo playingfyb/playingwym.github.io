@@ -233,17 +233,25 @@ async function renderCard(){
   ctx.moveTo(frameX + 30, bandY + 54);
   ctx.lineTo(frameX + frameW - 30, bandY + 54);
   ctx.stroke();
+  // Player Name (top)
+ctx.font = '800 36px "Inter", Arial';
+ctx.fillStyle = '#ffffff';
+ctx.textAlign = 'center';
+ctx.fillText(displayName, W / 2, bandY + 60);
 
-  // Player name (large, centered)
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '800 46px "Inter", Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText(displayName, W/2, bandY + 44);
+// Horizontal divider
+ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.moveTo(W / 4, bandY + 80);
+ctx.lineTo((W / 4) * 3, bandY + 80);
+ctx.stroke();
 
-  // Role subtitle (under name)
-  ctx.fillStyle = 'rgba(255,255,255,0.95)';
-  ctx.font = '700 34px "Inter", Arial';
-  ctx.fillText(roleName || 'ROLE', W/2, bandY + 100);
+// Player Role (below divider)
+ctx.font = '700 28px "Inter", Arial';
+ctx.fillText(roleName || 'ROLE', W / 2, bandY + 110);
+
+ 
 
   // create a second box above name for Team (as requested)
   // We'll place the team box directly above the player name, small pills look
@@ -257,8 +265,7 @@ async function renderCard(){
   ctx.fillStyle = '#e6f1fb';
   ctx.font = '700 18px "Inter", Arial';
   ctx.textAlign = 'center';
-  ctx.fillText(teamName || 'TEAM NAME', W/2, teamBoxY + 32);
-
+ 
   // Now draw the big triangular pocket below (the decorative triangle area) and place team logo inside
   // Triangle coordinates for an inverted triangle centered
   const triTopX = W/2, triTopY = bandY + 170 + 60; // top vertex towards center (adjust)
@@ -325,14 +332,6 @@ async function renderCard(){
     ctx.restore();
     console.warn('team logo missing', e);
   }
-
-  // small QR bottom-right
-  try {
-    const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(YOUTUBE_LINK);
-    const qrImg = await loadImage(qrUrl);
-    const qrW = 120;
-    ctx.drawImage(qrImg, W - 60 - qrW, H - 60 - qrW, qrW, qrW);
-
     // small label
     ctx.fillStyle = 'rgba(255,255,255,0.7)';
     ctx.font = '600 12px "Inter", Arial';
@@ -378,46 +377,3 @@ window.addEventListener('load', () => {
 
 </body>
 </html>
-/* Remove any scanner/placeholder styles */
-.scanner, .scanner-placeholder {
-    display: none !important;
-}
-
-/* Info container divided equally */
-.info-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 80%;
-    margin: 0 auto;
-    position: relative;
-}
-
-.player-info, .role-info {
-    flex: 1;
-    text-align: center;
-}
-
-.divider {
-    width: 2px;
-    background-color: white;
-    height: 40px;
-}
-
-/* Team Logo Placement */
-.team-logo-container {
-    position: absolute;
-    top: 25%;
-    left: 5%;
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.team-logo-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
