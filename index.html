@@ -257,8 +257,7 @@ async function renderCard(){
   ctx.fillStyle = '#e6f1fb';
   ctx.font = '700 18px "Inter", Arial';
   ctx.textAlign = 'center';
-  ctx.fillText(teamName || 'TEAM NAME', W/2, teamBoxY + 32);
-
+ 
   // Now draw the big triangular pocket below (the decorative triangle area) and place team logo inside
   // Triangle coordinates for an inverted triangle centered
   const triTopX = W/2, triTopY = bandY + 170 + 60; // top vertex towards center (adjust)
@@ -326,12 +325,8 @@ async function renderCard(){
     console.warn('team logo missing', e);
   }
 
-  // small QR bottom-right
-  try {
-    const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(YOUTUBE_LINK);
-    const qrImg = await loadImage(qrUrl);
-    const qrW = 120;
-    ctx.drawImage(qrImg, W - 60 - qrW, H - 60 - qrW, qrW, qrW);
+  
+  
 
     // small label
     ctx.fillStyle = 'rgba(255,255,255,0.7)';
