@@ -1,377 +1,77 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Cyberpunk Fan Card — Generator</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyberpunk Fan Card</title>
 <style>
-  :root{ --cyan:#00f7ff; --neon:#ff2da8; --bg:#071020; }
-  html,body{ height:100%; margin:0; background:#050506; font-family: Inter, Arial, sans-serif; color:#eaf6ff; }
-  .wrap { display:flex; gap:24px; padding:28px; align-items:flex-start; justify-content:center; flex-wrap:wrap; }
-  .panel {
-    width:360px; padding:16px; border-radius:12px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  body {
+    background: #111;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
   }
-  .panel h2{ margin:0 0 8px; color:#9fb0c2; font-size:18px; text-align:left; }
-  label{ display:block; color:#9fb0c2; font-size:13px; margin-top:12px; }
-  input[type=text], select {
-    width:100%; padding:8px 10px; margin-top:6px; border-radius:8px;
-    border:1px solid rgba(255,255,255,0.06); background:#fff; color:#071020; font-size:14px;
+  .card {
+    position: relative;
+    width: 800px;
+    height: 450px;
+    background: url('data:image/png;base64,PUT-YOUR-BASE64-IMAGE-HERE') no-repeat center/cover;
+    color: white;
+    overflow: hidden;
   }
-  .row{ display:flex; gap:8px; margin-top:12px; }
-  button{ padding:10px 12px; border-radius:8px; border:0; cursor:pointer; font-weight:700; }
-  .btn-gen{ background: linear-gradient(90deg,var(--cyan),#ff8a50); color:#021018; }
-  .btn-down{ background:transparent; color:#9fb0c2; border:1px solid rgba(255,255,255,0.05); }
-
-  /* Preview area - card */
-  .preview { width:760px; max-width:92vw; }
-  .preview h3 { margin:0 0 8px; color:#9fb0c2; font-size:14px; }
-  .card-wrap { position:relative; width:760px; max-width:100%; border-radius:14px; overflow:hidden; }
-  canvas { display:block; width:100%; height:auto; border-radius:12px; box-shadow:0 18px 60px rgba(0,0,0,0.6); background:#071026; }
-
-  /* scanner overlay that moves across QR (DOM element placed over canvas) */
-  .qr-scanner {
-    position:absolute; pointer-events:none;
-    width:120px; height:120px;
-    right: 60px; bottom: 80px; /* initial - will be repositioned to match canvas scale on draw */
-    overflow:hidden;
+  .team-name {
+    position: absolute;
+    top: 40px;
+    left: 50px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #00f6ff;
+    text-shadow: 2px 2px 4px black;
   }
-  .scanner-line {
-    position:absolute;
-    left:0; width:100%; height:8px;
-    background: linear-gradient(90deg, rgba(0,255,255,0.0), rgba(0,255,255,0.85), rgba(0,255,255,0.0));
-    animation: scanY 1800ms linear infinite;
-    mix-blend-mode: screen;
+  .player-name {
+    position: absolute;
+    top: 90px;
+    left: 50px;
+    font-size: 36px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px black;
   }
-  @keyframes scanY { 0%{ transform:translateY(-100%);} 100%{ transform:translateY(120%);} }
-
-  .hint{ color:#93a9b6; font-size:13px; margin-top:10px; }
-
-  @media (max-width:920px){
-    .wrap{ flex-direction:column-reverse; align-items:center; }
-    .panel{ width:min(92vw,420px); }
-    .preview{ width:92vw; }
+  .role {
+    position: absolute;
+    top: 140px;
+    left: 50px;
+    font-size: 24px;
+    color: #ff007c;
+    text-shadow: 2px 2px 4px black;
+  }
+  .team-logo {
+    position: absolute;
+    bottom: 40px;
+    right: 60px;
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+  .role-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.15;
+    object-fit: cover;
   }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <!-- controls -->
-  <div class="panel">
-    <h2>Fan Card Controls</h2>
-
-    <label for="nameInput">Player Name</label>
-    <input id="nameInput" type="text" placeholder="Amartya" value="AMARTYA">
-
-    <label for="roleSelect">Role (also shown on card)</label>
-    <select id="roleSelect"></select>
-
-    <label for="teamSelect">Team</label>
-    <select id="teamSelect"></select>
-
-    <label for="ytInput">YouTube link for QR (optional)</label>
-    <input id="ytInput" type="text" placeholder="https://www.youtube.com/@UniversaLGCofficial" value="https://www.youtube.com/@UniversaLGCofficial">
-
-    <div class="row" style="margin-top:14px;">
-      <button id="generateBtn" class="btn-gen">Generate</button>
-      <button id="downloadBtn" class="btn-down">Download PNG</button>
-    </div>
-
-    <div class="hint">Place your images in <code>role_images/</code> and <code>team_logos/images/</code> next to this page. Filenames must match exactly (see notes below).</div>
-    <div class="hint" style="margin-top:6px">Role files: <code>role_1.png</code> ... <code>role_4.png</code>. Team files: <code>team_logo_1.png</code> ... <code>team_logo_20.png</code>.</div>
-  </div>
-
-  <!-- preview -->
-  <div class="preview">
-    <h3>Live Preview</h3>
-    <div class="card-wrap" id="cardWrap">
-      <canvas id="cardCanvas" width="760" height="1080" aria-label="Fan card preview"></canvas>
-      <div class="qr-scanner" id="qrScanner"><div class="scanner-line"></div></div>
-    </div>
-  </div>
+<div class="card">
+  <img src="role-image.png" class="role-image" alt="Role Image">
+  <div class="team-name">Team Name</div>
+  <div class="player-name">Player Name</div>
+  <div class="role">Role</div>
+  <img src="team-logo.png" class="team-logo" alt="Team Logo">
 </div>
-
-<script>
-/* --------------------------
-   Data (exact team names & role mapping)
-   -------------------------- */
-const ROLES = [
-  { file: "role_1.png", name: "IGL" },
-  { file: "role_2.png", name: "Supporter / Filter" },
-  { file: "role_3.png", name: "Entry Fragger" },
-  { file: "role_4.png", name: "AR" }
-];
-
-const TEAMS = [
-  { file: "team_logo_1.png",  name: "VARANASI" },
-  { file: "team_logo_2.png",  name: "KALINGA WARRIORS" },
-  { file: "team_logo_3.png",  name: "SRINAGAR'S SEN" },
-  { file: "team_logo_4.png",  name: "DELHI ASSAULTERS" },
-  { file: "team_logo_5.png",  name: "PATNA IDATENS" },
-  { file: "team_logo_6.png",  name: "AHMEDABAD KE DAKU" },
-  { file: "team_logo_7.png",  name: "HYDERABAD MAVERICKS" },
-  { file: "team_logo_8.png",  name: "BOMBAY TYRANTS" },
-  { file: "team_logo_9.png",  name: "TEAM LUCKNOW CITIZENS" },
-  { file: "team_logo_10.png", name: "INDORI BISCUITS" },
-  { file: "team_logo_11.png", name: "DONT PEEK JAIPUR" },
-  { file: "team_logo_12.png", name: "PTOWN" },
-  { file: "team_logo_13.png", name: "CHANDIGARH WARRIOR'S" },
-  { file: "team_logo_14.png", name: "KOLKATA GAMERS." },
-  { file: "team_logo_15.png", name: "SHIMLA SLEDGERS" },
-  { file: "team_logo_16.png", name: "GUWAHATI GUNSLINGERS" },
-  { file: "team_logo_17.png", name: "GOA CLASHERS" },
-  { file: "team_logo_18.png", name: "RUTHLESS THALAIVAS" },
-  { file: "team_logo_19.png", name: "LADAKH LEGENDS" },
-  { file: "team_logo_20.png", name: "BANGLORE BANDITS" }
-];
-
-/* --------------------------
-   UI elements
-   -------------------------- */
-const roleSelect = document.getElementById('roleSelect');
-const teamSelect = document.getElementById('teamSelect');
-const nameInput = document.getElementById('nameInput');
-const ytInput = document.getElementById('ytInput');
-const generateBtn = document.getElementById('generateBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-
-const canvas = document.getElementById('cardCanvas');
-const ctx = canvas.getContext('2d', { alpha: false });
-const W = canvas.width, H = canvas.height;
-const cardWrap = document.getElementById('cardWrap');
-const qrScanner = document.getElementById('qrScanner');
-
-/* populate selects */
-ROLES.forEach(r => {
-  const o = document.createElement('option');
-  o.value = r.file;
-  o.textContent = r.name;
-  roleSelect.appendChild(o);
-});
-TEAMS.forEach(t => {
-  const o = document.createElement('option');
-  o.value = t.file;
-  o.textContent = t.name;
-  teamSelect.appendChild(o);
-});
-
-/* helper to load images */
-function loadImage(path){
-  return new Promise((resolve,reject)=>{
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = ()=> resolve(img);
-    img.onerror = ()=> reject(new Error("Failed loading "+path));
-    img.src = path;
-  });
-}
-
-/* draw function */
-async function renderCard(){
-  // read values
-  const playerName = (nameInput.value || "PLAYER NAME").toUpperCase();
-  const roleFile = roleSelect.value || ROLES[0].file;
-  const roleName = (ROLES.find(r=>r.file===roleFile)||{}).name || "";
-  const teamFile = teamSelect.value || TEAMS[0].file;
-  const teamName = (TEAMS.find(t=>t.file===teamFile)||{}).name || "";
-  const qrLink = ytInput.value && ytInput.value.trim() ? ytInput.value.trim() : "https://www.youtube.com/@UniversaLGCofficial";
-
-  // clear
-  ctx.fillStyle = '#071026';
-  ctx.fillRect(0,0,W,H);
-
-  // draw background base (use cyberpunk_base.png from repo root)
-  try {
-    const bg = await loadImage('cyberpunk_base.png');
-    // draw scaled to canvas
-    ctx.drawImage(bg, 0, 0, W, H);
-  } catch(e){
-    // if base missing, draw modern background fallback
-    const g = ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0,'#061426');
-    g.addColorStop(0.65,'#072633');
-    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-  }
-
-  // draw faint overlay to ensure readability
-  ctx.fillStyle = 'rgba(0,0,0,0.38)';
-  ctx.fillRect(0,0,W,H);
-
-  // ROLE IMAGE (as faint character)
-  try {
-    const roleImg = await loadImage('role_images/' + roleFile);
-    // place it to the right side (fit height with aspect)
-    const boxW = Math.round(W * 0.55);
-    const boxH = Math.round(H * 0.6);
-    const x = W - boxW - 40;
-    const y = 90;
-    let scale = Math.min(boxW/roleImg.width, boxH/roleImg.height);
-    const dw = Math.round(roleImg.width * scale);
-    const dh = Math.round(roleImg.height * scale);
-    const dx = x + Math.round((boxW-dw)/2);
-    const dy = y + Math.round((boxH-dh)/2);
-    ctx.save();
-    ctx.globalAlpha = 0.25; // low opacity
-    ctx.drawImage(roleImg, dx, dy, dw, dh);
-    ctx.restore();
-  } catch(e){
-    console.warn('role image not loaded',e);
-  }
-
-  // draw triangular team-logo holder (centered above name)
-  const triW = 220, triH = 180;
-  const triCx = Math.round(W/2);
-  const triTopY = H - 420;
-  const triBottomY = triTopY + triH;
-  // triangle path
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(triCx, triTopY);
-  ctx.lineTo(triCx - triW/2, triBottomY);
-  ctx.lineTo(triCx + triW/2, triBottomY);
-  ctx.closePath();
-  // fill subtle background for triangle
-  ctx.fillStyle = 'rgba(255,255,255,0.03)';
-  ctx.fill();
-  // clip to triangle and draw logo inside
-  ctx.clip();
-  try {
-    const teamImg = await loadImage('team_logos/images/' + teamFile);
-    // draw image centered in triangle bounding box
-    const tbx = triCx - triW/2, tby = triTopY, tbw = triW, tbh = triH;
-    // scale preserving aspect to cover triangle area nicely
-    let scale2 = Math.max(tbw/teamImg.width, tbh/teamImg.height);
-    const dw2 = Math.round(teamImg.width * scale2), dh2 = Math.round(teamImg.height * scale2);
-    const dx2 = tbx + Math.round((tbw - dw2)/2);
-    const dy2 = tby + Math.round((tbh - dh2)/2);
-    ctx.drawImage(teamImg, dx2, dy2, dw2, dh2);
-  } catch(e){
-    // nothing
-  }
-  ctx.restore();
-
-  // draw bright outline around triangle
-  ctx.beginPath();
-  ctx.moveTo(triCx, triTopY);
-  ctx.lineTo(triCx - triW/2, triBottomY);
-  ctx.lineTo(triCx + triW/2, triBottomY);
-  ctx.closePath();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = 'rgba(0,255,255,0.08)';
-  ctx.stroke();
-
-  // Team name box above name (center-left area)
-  const tBoxX = 80, tBoxY = H - 520, tBoxW = W - 160, tBoxH = 48;
-  // draw neon panel
-  ctx.fillStyle = 'rgba(0,255,255,0.06)';
-  roundRect(ctx, tBoxX, tBoxY, tBoxW, tBoxH, 10, true, false);
-  // team name text (left aligned inside box)
-  ctx.fillStyle = '#aef8ff';
-  ctx.font = '700 22px Inter, Arial';
-  ctx.textAlign = 'left';
-  ctx.fillText(teamName.toUpperCase(), tBoxX + 18, tBoxY + 32);
-
-  // Player name (big) below triangle
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '800 44px Inter, Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText(playerName, W/2, H - 260);
-
-  // Role (smaller) under player name
-  ctx.fillStyle = '#ff6eba';
-  ctx.font = '700 22px Inter, Arial';
-  ctx.fillText(roleName.toUpperCase(), W/2, H - 220);
-
-  // Draw QR (generated) at bottom-right
-  try {
-    const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(qrLink);
-    const qrImg = await loadImage(qrUrl);
-    const qrW = 140;
-    const qrX = W - 80 - qrW;
-    const qrY = H - 140 - qrW;
-    ctx.drawImage(qrImg, qrX, qrY, qrW, qrW);
-    // small label under QR
-    ctx.font = '600 12px Inter, Arial';
-    ctx.fillStyle = '#a9b7c3';
-    ctx.textAlign = 'center';
-    ctx.fillText('Scan → Live', qrX + qrW/2, qrY + qrW + 18);
-
-    // position the DOM scanner overlay to match this QR box (so it animates on top)
-    positionScannerOverlay(qrX, qrY, qrW, qrW);
-  } catch(e){
-    console.warn('QR failed', e);
-  }
-
-  // small footer watermark (optional)
-  ctx.font = '600 12px Inter, Arial';
-  ctx.fillStyle = 'rgba(255,255,255,0.04)';
-  ctx.textAlign = 'center';
-  ctx.fillText('Fan-made • UniversaLGCofficial', W/2, H - 14);
-}
-
-/* draw helper for rounded rect */
-function roundRect(ctx,x,y,w,h,r,fill,stroke){
-  if (typeof r === 'undefined') r = 5;
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-  if(fill) ctx.fill();
-  if(stroke){ ctx.stroke(); }
-}
-
-/* Position the DOM overlay (scanner) to sit exactly above the QR that was drawn on canvas.
-   Since the canvas scales to fit its container, we compute displayed size and scale coordinates. */
-function positionScannerOverlay(qx, qy, qw, qh){
-  const rect = canvas.getBoundingClientRect();
-  const scale = rect.width / W;
-  const left = rect.left + window.scrollX + qx * scale;
-  const top = rect.top + window.scrollY + qy * scale;
-  qrScanner.style.width = Math.round(qw * scale) + 'px';
-  qrScanner.style.height = Math.round(qh * scale) + 'px';
-  qrScanner.style.left = (left) + 'px';
-  qrScanner.style.top = (top) + 'px';
-  qrScanner.style.position = 'absolute';
-  // append to body (if not already)
-  if(!qrScanner.isConnected) document.body.appendChild(qrScanner);
-}
-
-/* --------------------------
-   Interactions
-   -------------------------- */
-generateBtn.addEventListener('click', renderCard);
-nameInput.addEventListener('input', renderCard);
-roleSelect.addEventListener('change', renderCard);
-teamSelect.addEventListener('change', renderCard);
-ytInput.addEventListener('change', renderCard);
-
-downloadBtn.addEventListener('click', async () => {
-  await renderCard(); // ensure latest
-  const dataUrl = canvas.toDataURL('image/png');
-  const a = document.createElement('a');
-  a.href = dataUrl;
-  a.download = 'fan_card.png';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-});
-
-/* initial defaults */
-window.addEventListener('load', () => {
-  roleSelect.selectedIndex = 0;
-  teamSelect.selectedIndex = 14; // default to SHIMLA SLEDGERS (index 14 -> team_logo_15)
-  // try to render once
-  setTimeout(renderCard, 120);
-});
-
-/* reposition overlay on resize/scroll */
-window.addEventListener('resize', ()=> { renderCard(); });
-window.addEventListener('scroll', ()=> { /* keep overlay positioned */ });
-
-</script>
 </body>
 </html>
