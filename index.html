@@ -103,13 +103,33 @@
   filter: brightness(2) contrast(1.2) drop-shadow(0 0 8px #00ffcc) drop-shadow(0 0 16px #00ffcc);
   z-index: 2;
 }
-   .team-logo-bg {
+  /* Background team logo container */
+.team-logo-bg {
   position: absolute;
-  inset: 0; /* top:0; left:0; right:0; bottom:0 */
-  background: url('team_logo.png') center/cover no-repeat;
-  opacity: 0.12;
-  filter: blur(2px);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.15; /* keep it subtle */
+  max-width: 90%;
+  max-height: 90%;
+  filter: brightness(0.65) drop-shadow(0 0 25px rgba(255, 0, 0, 0.45)); /* glow effect, adjust color */
+  animation: slowZoom 15s ease-in-out infinite alternate;
   z-index: 0;
+}
+
+/* Add blending gradient on top */
+.team-logo-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0.6));
+  pointer-events: none;
+}
+
+/* Slow background zoom for cinematic feel */
+@keyframes slowZoom {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  100% { transform: translate(-50%, -50%) scale(1.05); }
 }
 
     /* Role Image + Glow */
