@@ -150,7 +150,10 @@ async function githubList(path){
   if(!res.ok) return [];
   const data = await res.json();
   return data.filter(f => f.type==='file' && /\.(png|jpg|jpeg|webp)$/i.test(f.name))
-             .map(f=>({name:f.name,url:f.download_url}));
+             .map(f=>({
+               name: f.name.replace(/\.[^.]+$/, '').replace(/_/g, ' '), // clean role/team name
+               url: f.download_url
+             }));
 }
 function populate(sel, items, label){
   sel.innerHTML = '';
@@ -159,7 +162,7 @@ function populate(sel, items, label){
   sel.appendChild(ph);
   items.forEach(it=>{
     const o=document.createElement('option');
-    o.value=it.url; o.textContent=it.name.replace(/\.[^.]+$/,'');
+    o.value=it.url; o.textContent=it.name;
     sel.appendChild(o);
   });
 }
@@ -173,6 +176,7 @@ function applyPreview(){
   nameText.textContent = nameInput.value.trim().toUpperCase() || 'PLAYER NAME';
   const roleUrl = roleSelect.value;
   roleImg.src = roleUrl || '';
+  // show cleaned role name in label
   roleText.textContent = roleSelect.options[roleSelect.selectedIndex]?.text || 'ROLE';
   const teamUrl = teamSelect.value;
   teamBg.src = teamUrl || '';
