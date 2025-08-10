@@ -147,18 +147,20 @@
   border-radius: 12px; /* rounded corners */
   filter: drop-shadow(0 0 25px rgba(0, 0, 0, 1.8)); /* soft outer shadow */
 }
- /* Player Info */
+/* Player Info */
 .name {
   position:absolute; bottom:185px;
   width:100%; text-align:center;
   font-size:48px; font-weight:700; letter-spacing:1px;
   z-index:3;
 
-  /* ADD THESE ↓ */
   color: #fff;
   text-shadow: 0 0 10px rgba(0,255,255,0.8),
                0 0 20px rgba(0,255,255,0.6),
                0 0 30px rgba(0,255,255,0.4);
+
+  /* Animation */
+  animation: glowCyan 2s ease-in-out infinite alternate;
 }
 
 .divider {
@@ -178,13 +180,41 @@
   font-size:36px; font-weight:700;
   z-index:3;
 
-  /* ADD THESE ↓ */
   color: #fff;
   text-shadow: 0 0 8px rgba(255,0,255,0.8),
                0 0 16px rgba(255,0,255,0.6),
                0 0 24px rgba(255,0,255,0.4);
+
+  /* Animation */
+  animation: glowPink 2s ease-in-out infinite alternate;
 }
 
+/* Glow animations */
+@keyframes glowCyan {
+  from {
+    text-shadow: 0 0 5px rgba(0,255,255,0.5),
+                 0 0 10px rgba(0,255,255,0.4),
+                 0 0 15px rgba(0,255,255,0.3);
+  }
+  to {
+    text-shadow: 0 0 15px rgba(0,255,255,1),
+                 0 0 30px rgba(0,255,255,0.8),
+                 0 0 45px rgba(0,255,255,0.6);
+  }
+}
+
+@keyframes glowPink {
+  from {
+    text-shadow: 0 0 5px rgba(255,0,255,0.5),
+                 0 0 10px rgba(255,0,255,0.4),
+                 0 0 15px rgba(255,0,255,0.3);
+  }
+  to {
+    text-shadow: 0 0 15px rgba(255,0,255,1),
+                 0 0 30px rgba(255,0,255,0.8),
+                 0 0 45px rgba(255,0,255,0.6);
+  }
+}
 
     /* Organizer Name */
     .organizer {
