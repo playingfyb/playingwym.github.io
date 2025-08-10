@@ -1,178 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Fan Card Generator</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Card Generator</title>
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #0d1117;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 20px;
-    gap: 20px;
-  }
-  .controls {
-    background: #161b22;
-    padding: 15px;
-    border-radius: 8px;
-    width: 250px;
-  }
-  .controls label {
-    font-weight: bold;
-    display: block;
-    margin-top: 10px;
-    margin-bottom: 5px;
-  }
-  .controls input, .controls select, .controls button {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: none;
-    border-radius: 4px;
-  }
-  .controls button {
-    background: linear-gradient(90deg, #ff7e5f, #feb47b);
-    color: black;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .card {
-    background: #1f2937;
-    padding: 10px;
-    border-radius: 12px;
-    width: 500px;
-    text-align: center;
-    position: relative;
-  }
-  .card img.team-logo {
-    width: 100%;
-    opacity: 0.2;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-  }
-  .card img.role-img {
-    width: 300px;
-    position: relative;
-    z-index: 2;
-  }
-  .card-text {
-    position: relative;
-    z-index: 3;
-    margin-top: 20px;
-  }
-  .player-name {
-    font-size: 24px;
-    font-weight: bold;
-  }
-  .role-name {
-    font-size: 18px;
-  }
-  hr {
-    margin: 5px auto;
-    width: 50%;
-    border: 1px solid white;
-  }
+    body {
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+    #card {
+        position: relative;
+        width: 720px;
+        height: 1280px;
+        overflow: hidden;
+    }
+    #teamLogo {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.35; /* Increased opacity */
+        z-index: 0;
+    }
+    #roleImage {
+        position: absolute;
+        top: 20%; /* moved up */
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 80%;
+        z-index: 2;
+    }
+    .playerName {
+        position: absolute;
+        bottom: 160px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 2.5em;
+        font-weight: bold;
+        z-index: 3;
+    }
+    .playerRole {
+        position: absolute;
+        bottom: 120px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 1.8em;
+        font-weight: normal;
+        z-index: 3;
+    }
+    .divider {
+        position: absolute;
+        bottom: 140px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 2px;
+        background: white;
+        z-index: 3;
+    }
 </style>
 </head>
 <body>
 
-<div class="controls">
-  <label>Player name</label>
-  <input type="text" id="playerName" placeholder="Enter player name" />
-
-  <label>Role</label>
-  <select id="role"></select>
-
-  <label>Team</label>
-  <select id="team"></select>
-
-  <button onclick="updateCard()">Apply</button>
-  <button onclick="downloadPNG()">Download PNG</button>
-  <p style="font-size: 12px; color: gray;">Auto-loads your GitHub images.</p>
+<div id="card">
+    <img id="teamLogo" src="" alt="Team Logo">
+    <img id="roleImage" src="" alt="Role Image">
+    <div class="playerName" id="playerName"></div>
+    <div class="divider"></div>
+    <div class="playerRole" id="playerRole"></div>
 </div>
 
-<div class="card" id="card">
-  <img id="teamLogo" class="team-logo" src="" alt="Team Logo" />
-  <img id="roleImage" class="role-img" src="" alt="Role" />
-  <div class="card-text">
-    <div id="playerNameText" class="player-name"></div>
-    <hr />
-    <div id="roleText" class="role-name"></div>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-// Role name mapping
-const roleNames = {
-  'role_1.png': 'Entry Fragger',
-  'role_2.png': 'Sniper',
-  'role_3.png': 'Support',
-  'role_4.png': 'In-game Leader'
-};
+    const roleNames = {
+        role1: "Entry Fragger",
+        role2: "Sniper",
+        role3: "Support",
+        role4: "In-Game Leader",
+        role5: "Rifler"
+    };
 
-// Auto load roles and teams from GitHub
-async function loadOptions() {
-  const roleRes = await fetch('https://api.github.com/repos/playingfyb/playingwym.github.io/contents/role_images');
-  const teamRes = await fetch('https://api.github.com/repos/playingfyb/playingwym.github.io/contents/team_logos');
-  const roles = await roleRes.json();
-  const teams = await teamRes.json();
+    const playerData = {
+        name: "AMARTYA",
+        role: "role2", // preloaded role key
+        teamLogo: "team_logos/team1.png",
+        roleImage: "role_images/role2.png"
+    };
 
-  const roleSelect = document.getElementById('role');
-  const teamSelect = document.getElementById('team');
-
-  roles.forEach(file => {
-    if (file.name.endsWith('.png')) {
-      const opt = document.createElement('option');
-      opt.value = file.name;
-      opt.textContent = roleNames[file.name] || file.name;
-      roleSelect.appendChild(opt);
+    function populate() {
+        document.getElementById('teamLogo').src = playerData.teamLogo;
+        document.getElementById('roleImage').src = playerData.roleImage;
+        document.getElementById('playerName').textContent = playerData.name;
+        document.getElementById('playerRole').textContent = roleNames[playerData.role] || playerData.role;
     }
-  });
 
-  teams.forEach(file => {
-    if (file.name.endsWith('.png')) {
-      const opt = document.createElement('option');
-      opt.value = file.name;
-      opt.textContent = file.name.replace('.png', '').replace(/_/g, ' ');
-      teamSelect.appendChild(opt);
-    }
-  });
-}
-
-function updateCard() {
-  const playerName = document.getElementById('playerName').value;
-  const selectedRole = document.getElementById('role').value;
-  const selectedTeam = document.getElementById('team').value;
-
-  const displayRoleName = roleNames[selectedRole] || selectedRole;
-
-  document.getElementById('playerNameText').innerText = playerName;
-  document.getElementById('roleText').innerText = displayRoleName;
-
-  document.getElementById('roleImage').src = `role_images/${selectedRole}`;
-  document.getElementById('teamLogo').src = `team_logos/${selectedTeam}`;
-}
-
-function downloadPNG() {
-  html2canvas(document.getElementById('card')).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'fan_card.png';
-    link.href = canvas.toDataURL();
-    link.click();
-  });
-}
-
-loadOptions();
+    window.onload = populate;
 </script>
 
 </body>
 </html>
-
