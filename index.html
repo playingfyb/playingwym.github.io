@@ -98,9 +98,17 @@
       background: radial-gradient(circle, rgba(122,60,255,0.4) 0%, rgba(0,191,255,0.2) 70%, transparent 100%);
       filter:blur(45px); border-radius:50%; z-index:1;
     }
-    .role-img {
-      position:relative; width:580px; z-index:2;
-    }
+   .role-img {
+  position: relative;
+  width: 580px;
+  z-index: 2;
+
+  /* Add integration effects */
+  border: 3px solid rgba(255, 255, 255, 0.8); /* thin light border */
+  border-radius: 12px; /* rounded corners */
+  filter: drop-shadow(0 0 25px rgba(0, 0, 0, 0.6)); /* soft outer shadow */
+}
+
     /* Player Info */
     .name {
       position:absolute; bottom:200px;
