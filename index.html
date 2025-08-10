@@ -71,9 +71,13 @@
       background: radial-gradient(circle, rgba(122,60,255,0.35) 0%, rgba(0,191,255,0.25) 70%, transparent 100%);
       filter:blur(40px); border-radius:50%; z-index:1;
     }
-    .tournament-logo {
-      position:relative; width:180px; z-index:2;
-    }
+   .tournament-logo {
+  position: relative;
+  height: 100px; /* or whatever size you want */
+  filter: brightness(2) contrast(1.2) drop-shadow(0 0 8px #00ffcc) drop-shadow(0 0 16px #00ffcc);
+  z-index: 2;
+}
+
     .team-bg {
       position:absolute; inset:0;
       object-fit:cover;
