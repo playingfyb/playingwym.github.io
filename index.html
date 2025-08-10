@@ -1,107 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Player Card Generator</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #111;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Fan Card — Final</title>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --card-w:768px;
+      --card-h:1152px;
+      --bg1:#120217;
+      --bg2:#3b0058;
     }
-    #card {
-        position: relative;
-        width: 720px;
-        height: 1280px;
-        overflow: hidden;
+    *{ box-sizing: border-box; margin:0; padding:0; }
+    body{
+      background: linear-gradient(180deg,#05050a,#071426);
+      color: #fff;
+      font-family: "PT Serif", serif;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 28px;
+      min-height: 100vh;
     }
-    #teamLogo {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        opacity: 0.35; /* Increased opacity */
-        z-index: 0;
+    .controls {
+      width: 340px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      padding: 14px;
     }
-    #roleImage {
-        position: absolute;
-        top: 20%; /* moved up */
-        left: 50%;
-        transform: translateX(-50%);
-        max-width: 80%;
-        z-index: 2;
+    .controls h2 { font-size:18px; color:#cbd8e5; margin-bottom:12px; }
+    label { font-size:13px; color:#c1d3e3; margin-top:10px; display:block; }
+    input[type=text], select {
+      width:100%;
+      padding:10px;
+      margin-top:8px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.06);
+      background:#fff;
+      color:#07121a;
+      font-size:15px;
     }
-    .playerName {
-        position: absolute;
-        bottom: 160px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 2.5em;
-        font-weight: bold;
-        z-index: 3;
+    .row { display:flex; gap:8px; margin-top:12px; }
+    button {
+      padding:10px 12px; border-radius:8px; border:0; cursor:pointer; font-weight:700;
     }
-    .playerRole {
-        position: absolute;
-        bottom: 120px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 1.8em;
-        font-weight: normal;
-        z-index: 3;
+    .btn-primary { background: linear-gradient(90deg,#ff7a18,#ff4e50); color:white; flex:1; }
+    .btn-ghost { background:transparent; color:#c1d3e3; border:1px solid rgba(255,255,255,0.04); width:120px; }
+    .hint { margin-top:10px; color:#9fb0c2; font-size:12px; }
+
+    .preview { width:800px; max-width:calc(100vw - 420px); }
+    .card-wrap {
+      width: var(--card-w);
+      height: var(--card-h);
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 30px 80px rgba(0,0,0,0.7);
+      background:#111;
     }
-    .divider {
-        position: absolute;
-        bottom: 140px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 200px;
-        height: 2px;
-        background: white;
-        z-index: 3;
+    .card {
+      position: relative;
+      width:100%; height:100%;
+      background: linear-gradient(180deg,var(--bg1),var(--bg2));
+      font-family: "PT Serif", serif;
+      color: white;
     }
-</style>
+
+    .team-bg {
+      position:absolute; inset:0;
+      object-fit:cover;
+      width:100%; height:100%;
+      opacity:0.35; /* Increased opacity */
+      z-index:0;
+    }
+    .role-img {
+      position:absolute;
+      left:50%; top:38%; /* Moved up from 45% */
+      transform: translate(-50%, -50%);
+      width:62%; max-height:62%;
+      object-fit:contain;
+      z-index:2;
+    }
+    .name {
+      position:absolute;
+      bottom: 160px; /* Raised name a bit */
+      width:100%; text-align:center;
+      font-size:48px; font-weight:700;
+      letter-spacing:1px;
+      z-index:3;
+    }
+    .role-label {
+      position:absolute;
+      bottom: 110px; /* Role below name */
+      width:100%; text-align:center;
+      font-size:34px; font-weight:700;
+      z-index:3;
+    }
+
+    @media (max-width:1100px){
+      body{ padding:12px; flex-direction:column; align-items:center; gap:12px; }
+      .controls{ width:92vw; }
+      .preview{ width:92vw; }
+      .card-wrap{ transform:scale(0.85); transform-origin:top center; }
+    }
+  </style>
 </head>
 <body>
 
-<div id="card">
-    <img id="teamLogo" src="" alt="Team Logo">
-    <img id="roleImage" src="" alt="Role Image">
-    <div class="playerName" id="playerName"></div>
-    <div class="divider"></div>
-    <div class="playerRole" id="playerRole"></div>
-</div>
+  <div class="controls">
+    <h2>Fan Card Controls</h2>
+
+    <label>Player name</label>
+    <input id="nameInput" type="text" placeholder="Player Name" value="AMARTYA">
+
+    <label>Role</label>
+    <select id="roleSelect"><option>Loading roles…</option></select>
+
+    <label>Team</label>
+    <select id="teamSelect"><option>Loading teams…</option></select>
+
+    <div class="row">
+      <button id="genBtn" class="btn-primary">Apply</button>
+      <button id="dlBtn" class="btn-ghost">Download PNG</button>
+    </div>
+    <div class="hint">Auto-loads your GitHub images. No manual edits needed.</div>
+  </div>
+
+  <div class="preview">
+    <div class="card-wrap">
+      <div class="card">
+        <img id="teamBg" class="team-bg" src="">
+        <img id="roleImg" class="role-img" src="">
+        <div id="nameText" class="name">PLAYER NAME</div>
+        <div id="roleText" class="role-label">ROLE</div>
+      </div>
+    </div>
+  </div>
 
 <script>
-    const roleNames = {
-        role1: "Entry Fragger",
-        role2: "Sniper",
-        role3: "Support",
-        role4: "In-Game Leader",
-        role5: "Rifler"
-    };
+const OWNER = 'playingfyb';
+const REPO = 'playingwym.github.io';
+const ROLE_PATH = 'role_images';
+const TEAM_PATH = 'team_logos/images';
 
-    const playerData = {
-        name: "AMARTYA",
-        role: "role2", // preloaded role key
-        teamLogo: "team_logos/team1.png",
-        roleImage: "role_images/role2.png"
-    };
+async function githubList(path){
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+  const res = await fetch(url);
+  if(!res.ok) return [];
+  const data = await res.json();
+  return data.filter(f => f.type==='file' && /\.(png|jpg|jpeg|webp)$/i.test(f.name))
+             .map(f=>({name:f.name,url:f.download_url}));
+}
+function populate(sel, items, label){
+  sel.innerHTML = '';
+  const ph = document.createElement('option');
+  ph.value=''; ph.textContent=label;
+  sel.appendChild(ph);
+  items.forEach(it=>{
+    const o=document.createElement('option');
+    o.value=it.url; o.textContent=it.name.replace(/\.[^.]+$/,'');
+    sel.appendChild(o);
+  });
+}
+async function init(){
+  const [roles, teams] = await Promise.all([githubList(ROLE_PATH), githubList(TEAM_PATH)]);
+  populate(roleSelect, roles, 'Select role');
+  populate(teamSelect, teams, 'Select team');
+  applyPreview();
+}
+function applyPreview(){
+  nameText.textContent = nameInput.value.trim().toUpperCase() || 'PLAYER NAME';
+  const roleUrl = roleSelect.value;
+  roleImg.src = roleUrl || '';
+  roleText.textContent = roleSelect.options[roleSelect.selectedIndex]?.text || 'ROLE';
+  const teamUrl = teamSelect.value;
+  teamBg.src = teamUrl || '';
+}
 
-    function populate() {
-        document.getElementById('teamLogo').src = playerData.teamLogo;
-        document.getElementById('roleImage').src = playerData.roleImage;
-        document.getElementById('playerName').textContent = playerData.name;
-        document.getElementById('playerRole').textContent = roleNames[playerData.role] || playerData.role;
-    }
-
-    window.onload = populate;
+genBtn.addEventListener('click', e=>{e.preventDefault(); applyPreview();});
+dlBtn.addEventListener('click', async e=>{
+  e.preventDefault();
+  const W=768,H=1152;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#3b0058');g.addColorStop(1,'#8e00a8');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  ctx.globalAlpha=0.35;
+  if(teamBg.src) {
+    const img=await loadImg(teamBg.src);
+    ctx.drawImage(img,0,0,W,H);
+  }
+  ctx.globalAlpha=1;
+  if(roleImg.src){
+    const img=await loadImg(roleImg.src);
+    const maxW=W*0.62, maxH=H*0.48;
+    const scale=Math.min(maxW/img.width,maxH/img.height,1);
+    const dw=img.width*scale,dh=img.height*scale;
+    ctx.drawImage(img,(W-dw)/2,H*0.35-dh/2,dw,dh);
+  }
+  ctx.fillStyle='white';
+  ctx.font='bold 36px PT Serif';
+  ctx.textAlign='center';
+  ctx.fillText(nameText.textContent,W/2,H*0.8);
+  ctx.font='700 24px PT Serif';
+  ctx.fillText(roleText.textContent,W/2,H*0.84);
+  const a=document.createElement('a');
+  a.href=c.toDataURL('image/png');
+  a.download='fan_card.png';document.body.appendChild(a);a.click();a.remove();
+});
+function loadImg(src){return new Promise(r=>{const i=new Image();i.crossOrigin='anonymous';i.onload=()=>r(i);i.src=src;});}
+init();
 </script>
 
 </body>
