@@ -55,13 +55,47 @@
       box-shadow:0 30px 80px rgba(0,0,0,0.7);
       background:#111;
     }
-    .card {
-      position:relative;
-      width:100%; height:100%;
-      background: linear-gradient(180deg,var(--bg1),var(--bg2));
-      font-family:'PT Serif', serif;
-      color:white;
-    }
+   .card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, var(--bg1), var(--bg2));
+  font-family: 'PT Serif', serif;
+  color: white;
+  overflow: hidden; /* gradient ko bahar jaane se rokne ke liye */
+}
+
+/* Animated gradient overlay */
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    45deg,
+    rgba(0, 255, 255, 0.15),
+    rgba(255, 0, 255, 0.15),
+    rgba(0, 255, 0, 0.15)
+  );
+  background-size: 400% 400%;
+  animation: gradientMove 10s ease infinite;
+  z-index: 0; /* sabse piche */
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Card ke andar ka actual content overlay ke upar ho */
+.card > * {
+  position: relative;
+  z-index: 1;
+}
+
     /* Tournament Logo + Glow */
     .tournament-wrapper { position:absolute; top:20px; left:50%; transform:translateX(-50%); z-index:3; }
     .tournament-glow {
