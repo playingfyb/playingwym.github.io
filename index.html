@@ -1,135 +1,110 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Fan Card — Auto preload from GitHub</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Fan Card — Final</title>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --card-w:768px;
+      --card-h:1152px;
+      --bg1:#120217;
+      --bg2:#3b0058;
+    }
+    *{ box-sizing: border-box; margin:0; padding:0; }
+    body{
+      background: linear-gradient(180deg,#05050a,#071426);
+      color: #fff;
+      font-family: "PT Serif", serif;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 28px;
+      min-height: 100vh;
+    }
+    .controls {
+      width: 340px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .controls h2 { font-size:18px; color:#cbd8e5; margin-bottom:12px; }
+    label { font-size:13px; color:#c1d3e3; margin-top:10px; display:block; }
+    input[type=text], select {
+      width:100%;
+      padding:10px;
+      margin-top:8px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.06);
+      background:#fff;
+      color:#07121a;
+      font-size:15px;
+    }
+    .row { display:flex; gap:8px; margin-top:12px; }
+    button {
+      padding:10px 12px; border-radius:8px; border:0; cursor:pointer; font-weight:700;
+    }
+    .btn-primary { background: linear-gradient(90deg,#ff7a18,#ff4e50); color:white; flex:1; }
+    .btn-ghost { background:transparent; color:#c1d3e3; border:1px solid rgba(255,255,255,0.04); width:120px; }
+    .hint { margin-top:10px; color:#9fb0c2; font-size:12px; }
 
-<link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+    .preview { width:800px; max-width:calc(100vw - 420px); }
+    .card-wrap {
+      width: var(--card-w);
+      height: var(--card-h);
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 30px 80px rgba(0,0,0,0.7);
+      background:#111;
+    }
+    .card {
+      position: relative;
+      width:100%; height:100%;
+      background: linear-gradient(180deg,var(--bg1),var(--bg2));
+      font-family: "PT Serif", serif;
+      color: white;
+    }
 
-<style>
-  :root{
-    --card-w:768px;
-    --card-h:1152px;
-    --bg1:#120217;
-    --bg2:#3b0058;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    min-height:100vh;
-    background:linear-gradient(180deg,#05050a,#071426);
-    color:#fff;
-    font-family: "PT Serif", serif;
-    display:flex;
-    gap:20px;
-    align-items:flex-start;
-    justify-content:center;
-    padding:28px;
-  }
+    .team-bg {
+      position:absolute; inset:0;
+      object-fit:cover;
+      width:100%; height:100%;
+      opacity:0.35; /* Increased opacity */
+      z-index:0;
+    }
+    .role-img {
+      position:absolute;
+      left:50%; top:38%; /* Moved up from 45% */
+      transform: translate(-50%, -50%);
+      width:62%; max-height:62%;
+      object-fit:contain;
+      z-index:2;
+    }
+    .name {
+      position:absolute;
+      bottom: 160px; /* Raised name a bit */
+      width:100%; text-align:center;
+      font-size:48px; font-weight:700;
+      letter-spacing:1px;
+      z-index:3;
+    }
+    .role-label {
+      position:absolute;
+      bottom: 110px; /* Role below name */
+      width:100%; text-align:center;
+      font-size:34px; font-weight:700;
+      z-index:3;
+    }
 
-  .controls {
-    width:340px;
-    background: rgba(255,255,255,0.03);
-    border-radius:10px;
-    padding:14px;
-  }
-  .controls h2{ margin:0 0 12px 0; font-size:18px; color:#cbd8e5; }
-  label{ display:block; font-size:13px; color:#c1d3e3; margin-top:10px; }
-  input[type=text], select {
-    width:100%;
-    padding:10px;
-    margin-top:8px;
-    border-radius:8px;
-    border:1px solid rgba(255,255,255,0.06);
-    background:#fff; color:#07121a; font-size:15px;
-  }
-  .row{ display:flex; gap:8px; margin-top:12px; }
-  button { padding:10px 12px; border-radius:8px; border:0; cursor:pointer; font-weight:700; }
-  .btn-primary{ background: linear-gradient(90deg,#ff7a18,#ff4e50); color:white; flex:1; }
-  .btn-ghost{ background:transparent; color:#c1d3e3; border:1px solid rgba(255,255,255,0.04); width:120px; }
-
-  .preview { width:800px; max-width:calc(100vw - 420px); }
-  .card-wrap { width:var(--card-w); height:var(--card-h); border-radius:20px; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,0.7); background:#111; position:relative; }
-  .card {
-    width:100%; height:100%; position:relative; font-family:'PT Serif', serif;
-    background: linear-gradient(180deg,var(--bg1),var(--bg2));
-  }
-
-  /* team logo background (stretched) */
-  .team-bg {
-    position:absolute; inset:0; width:100%; height:100%;
-    object-fit:cover; opacity:0.06; z-index:0; filter:brightness(0.9);
-  }
-
-  /* role image centered */
-  .role-img {
-    position:absolute;
-    left:50%;
-    top:45%;
-    transform:translate(-50%,-50%);
-    width:62%;
-    max-height:62%;
-    object-fit:contain;
-    z-index:2;
-  }
-
-  /* bottom band for name/role */
-  .band {
-    position:absolute;
-    left:96px;
-    right:96px;
-    top:760px;
-    height:260px;
-    background: rgba(0,0,0,0.32);
-    border-radius:12px;
-    z-index:1;
-  }
-
-  .name {
-    position:absolute;
-    top:796px;
-    left:0; right:0;
-    text-align:center;
-    font-size:48px;
-    font-weight:700;
-    color:#ffffff;
-    z-index:3;
-    letter-spacing:1px;
-  }
-
-  .divider {
-    position:absolute;
-    top:848px;
-    left:calc(18%); right:calc(18%);
-    height:2px;
-    background:rgba(255,255,255,0.9);
-    z-index:3;
-  }
-
-  .role-label {
-    position:absolute;
-    top:872px;
-    left:0; right:0;
-    text-align:center;
-    font-size:34px;
-    font-weight:700;
-    color:rgba(255,255,255,0.95);
-    z-index:3;
-  }
-
-  .hint { margin-top:10px; color:#9fb0c2; font-size:12px; }
-
-  /* modal / error */
-  .status { margin-top:10px; color:#ffb3b3; font-size:13px; }
-
-  @media (max-width:1100px){
-    body{ padding:12px; gap:12px; flex-direction:column; align-items:center; }
-    .controls{ width:92vw; }
-    .preview{ width:92vw; }
-    .card-wrap{ transform:scale(0.85); transform-origin:top center; }
-  }
-</style>
+    @media (max-width:1100px){
+      body{ padding:12px; flex-direction:column; align-items:center; gap:12px; }
+      .controls{ width:92vw; }
+      .preview{ width:92vw; }
+      .card-wrap{ transform:scale(0.85); transform-origin:top center; }
+    }
+  </style>
 </head>
 <body>
 
@@ -137,265 +112,105 @@
     <h2>Fan Card Controls</h2>
 
     <label>Player name</label>
-    <input id="nameInput" type="text" placeholder="Amartya" value="AMARTYA">
+    <input id="nameInput" type="text" placeholder="Player Name" value="AMARTYA">
 
-    <label>Role (select)</label>
+    <label>Role</label>
     <select id="roleSelect"><option>Loading roles…</option></select>
 
-    <label>Team (select)</label>
+    <label>Team</label>
     <select id="teamSelect"><option>Loading teams…</option></select>
 
     <div class="row">
       <button id="genBtn" class="btn-primary">Apply</button>
       <button id="dlBtn" class="btn-ghost">Download PNG</button>
     </div>
-
-    <div class="hint">Images are loaded from your GitHub repo automatically.</div>
-    <div class="status" id="status"></div>
+    <div class="hint">Auto-loads your GitHub images. No manual edits needed.</div>
   </div>
 
   <div class="preview">
-    <h3 style="margin:8px 0 12px 0; color:#c6d7e8">Live Preview</h3>
     <div class="card-wrap">
-      <div class="card" id="card">
-
-        <!-- team bg (stretched) -->
+      <div class="card">
         <img id="teamBg" class="team-bg" src="">
-
-        <!-- role image -->
         <img id="roleImg" class="role-img" src="">
-
-        <!-- band + texts -->
-        <div class="band" aria-hidden="true"></div>
         <div id="nameText" class="name">PLAYER NAME</div>
-        <div class="divider"></div>
         <div id="roleText" class="role-label">ROLE</div>
-
       </div>
     </div>
   </div>
 
 <script>
-/*
-  Final auto-load index.html
-  - Uses GitHub Contents API to list files in two folders:
-    /role_images and /team_logos/images
-  - Owner/repo hardcoded per your repo
-*/
-
 const OWNER = 'playingfyb';
 const REPO = 'playingwym.github.io';
 const ROLE_PATH = 'role_images';
 const TEAM_PATH = 'team_logos/images';
 
-const roleSelect = document.getElementById('roleSelect');
-const teamSelect = document.getElementById('teamSelect');
-const nameInput = document.getElementById('nameInput');
-const genBtn = document.getElementById('genBtn');
-const dlBtn = document.getElementById('dlBtn');
-const statusEl = document.getElementById('status');
-
-const teamBg = document.getElementById('teamBg');
-const roleImg = document.getElementById('roleImg');
-const nameText = document.getElementById('nameText');
-const roleText = document.getElementById('roleText');
-
 async function githubList(path){
-  // path is like 'role_images' or 'team_logos/images'
   const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
-  try{
-    const res = await fetch(url);
-    if(!res.ok) throw new Error(`GitHub API ${res.status}`);
-    const data = await res.json();
-    // filter PNG/JPG only
-    return data.filter(f => f.type === 'file' && /\.(png|jpg|jpeg|webp)$/i.test(f.name))
-               .map(f => ({ name: f.name, url: f.download_url }));
-  }catch(e){
-    console.error('githubList error', e);
-    statusEl.textContent = 'Could not load images from GitHub — check repo path or rate limit.';
-    return [];
-  }
+  const res = await fetch(url);
+  if(!res.ok) return [];
+  const data = await res.json();
+  return data.filter(f => f.type==='file' && /\.(png|jpg|jpeg|webp)$/i.test(f.name))
+             .map(f=>({name:f.name,url:f.download_url}));
 }
-
-function populateSelect(sel, items, emptyLabel){
+function populate(sel, items, label){
   sel.innerHTML = '';
-  if(items.length === 0){
-    const o = document.createElement('option'); o.textContent = 'None found'; sel.appendChild(o); return;
-  }
-  const placeholder = document.createElement('option');
-  placeholder.value = '';
-  placeholder.textContent = `Select ${emptyLabel}`;
-  sel.appendChild(placeholder);
+  const ph = document.createElement('option');
+  ph.value=''; ph.textContent=label;
+  sel.appendChild(ph);
   items.forEach(it=>{
-    const o = document.createElement('option');
-    o.value = it.url;
-    o.textContent = it.name;
+    const o=document.createElement('option');
+    o.value=it.url; o.textContent=it.name.replace(/\.[^.]+$/,'');
     sel.appendChild(o);
   });
 }
-
 async function init(){
-  statusEl.textContent = 'Loading images from GitHub…';
-  const [roles, teams] = await Promise.all([ githubList(ROLE_PATH), githubList(TEAM_PATH) ]);
-  if(roles.length===0 || teams.length===0){
-    statusEl.textContent = 'No images found in one or both folders — check paths in code.';
-  } else {
-    statusEl.textContent = '';
-  }
-  populateSelect(roleSelect, roles, 'role');
-  populateSelect(teamSelect, teams, 'team');
-
-  // set defaults if available
-  if(roleSelect.options.length>1) roleSelect.selectedIndex = 1;
-  if(teamSelect.options.length>1) teamSelect.selectedIndex = 1;
-  // apply initial preview
+  const [roles, teams] = await Promise.all([githubList(ROLE_PATH), githubList(TEAM_PATH)]);
+  populate(roleSelect, roles, 'Select role');
+  populate(teamSelect, teams, 'Select team');
   applyPreview();
 }
-
 function applyPreview(){
-  const name = (nameInput.value||'').trim().toUpperCase() || 'PLAYER NAME';
-  nameText.textContent = name;
-
+  nameText.textContent = nameInput.value.trim().toUpperCase() || 'PLAYER NAME';
   const roleUrl = roleSelect.value;
-  const roleLabel = roleSelect.options[roleSelect.selectedIndex] ? roleSelect.options[roleSelect.selectedIndex].text : '';
-  roleText.textContent = roleLabel ? roleLabel.replace(/\.[^.]+$/,'') : 'ROLE';
-
-  if(roleUrl) roleImg.src = roleUrl; else roleImg.src = '';
-
+  roleImg.src = roleUrl || '';
+  roleText.textContent = roleSelect.options[roleSelect.selectedIndex]?.text || 'ROLE';
   const teamUrl = teamSelect.value;
-  if(teamUrl) teamBg.src = teamUrl; else teamBg.src = '';
+  teamBg.src = teamUrl || '';
 }
 
-// download: draw to canvas at 768x1152 and export PNG
-async function downloadPNG(){
-  const W = 768, H = 1152;
-  const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-
-  // background gradient
-  const g = ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#3b0058'); g.addColorStop(1,'#8e00a8');
-  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-
-  // frame inset
-  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-  ctx.lineWidth = 6;
-  roundRect(ctx, 20,20, W-40, H-40, 24, false, true);
-
-  // draw team background (stretched)
-  const teamUrl = teamSelect.value;
-  if(teamUrl){
-    try{
-      const img = await loadImage(teamUrl);
-      ctx.globalAlpha = 0.06;
-      // draw covering whole canvas
-      ctx.drawImage(img, 0, 0, W, H);
-      ctx.globalAlpha = 1.0;
-    }catch(e){ console.warn('team draw failed', e); }
-  }
-
-  // draw role image centered in top area (frameX=120, frameY=120 equivalent ratio)
-  const frameX = 120, frameY = 120, frameW = W - 240, frameH = 560;
-  const roleUrl = roleSelect.value;
-  if(roleUrl){
-    try{
-      const rimg = await loadImage(roleUrl);
-      const maxW = frameW - 20, maxH = frameH - 20;
-      const scale = Math.min(maxW / rimg.width, maxH / rimg.height);
-      const dw = Math.round(rimg.width * scale), dh = Math.round(rimg.height * scale);
-      const dx = Math.round((W - dw)/2), dy = Math.round(frameY + (frameH - dh)/2);
-      ctx.globalAlpha = 1.0;
-      ctx.drawImage(rimg, dx, dy, dw, dh);
-    }catch(e){ console.warn(e); }
-  }
-
-  // draw bottom band dark
-  const bandX = frameX, bandY = frameY + frameH + 12, bandW = frameW, bandH = 160;
-  ctx.fillStyle = 'rgba(0,0,0,0.32)';
-  roundRect(ctx, bandX, bandY, bandW, bandH, 8, true, false);
-
-  // name (upper)
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '800 36px PT Serif, serif';
-  ctx.textAlign = 'center';
-  const name = (nameInput.value||'').trim().toUpperCase() || 'PLAYER NAME';
-  ctx.fillText(name, W/2, bandY + 44);
-
-  // divider
-  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-  ctx.lineWidth = 1.4;
-  ctx.beginPath();
-  ctx.moveTo(W*0.18, bandY + 68);
-  ctx.lineTo(W*0.82, bandY + 68);
-  ctx.stroke();
-
-  // role text lower
-  const roleLabel = roleSelect.options[roleSelect.selectedIndex] ? roleSelect.options[roleSelect.selectedIndex].text.replace(/\.[^.]+$/,'') : 'ROLE';
-  ctx.fillStyle = 'rgba(255,255,255,0.95)';
-  ctx.font = '700 30px PT Serif, serif';
-  ctx.fillText(roleLabel, W/2, bandY + 110);
-
-  // watermark tiny
-  ctx.font = '600 12px PT Serif, serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.04)';
-  ctx.textAlign = 'center';
-  ctx.fillText('Fan-made • UniversaLGCofficial', W/2, H - 10);
-
-  // download
-  const a = document.createElement('a');
-  a.href = canvas.toDataURL('image/png');
-  a.download = 'fan_card.png';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-/* helpers */
-function loadImage(src){
-  return new Promise((resolve,reject)=>{
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = ()=>resolve(img);
-    img.onerror = (e)=>reject(e);
-    img.src = src;
-  });
-}
-function roundRect(ctx,x,y,w,h,r, fill=true, stroke=false){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y, x+w,y+h, r);
-  ctx.arcTo(x+w,y+h, x,y+h, r);
-  ctx.arcTo(x,y+h, x,y, r);
-  ctx.arcTo(x,y, x+w,y, r);
-  ctx.closePath();
-  if(fill) ctx.fill();
-  if(stroke) ctx.stroke();
-}
-
-/* events */
-genBtn.addEventListener('click', (e)=>{
+genBtn.addEventListener('click', e=>{e.preventDefault(); applyPreview();});
+dlBtn.addEventListener('click', async e=>{
   e.preventDefault();
-  applyPreview();
-});
-dlBtn.addEventListener('click', async (e)=>{
-  e.preventDefault();
-  statusEl.textContent = 'Preparing PNG…';
-  try{
-    await downloadPNG();
-    statusEl.textContent = '';
-  }catch(err){
-    statusEl.textContent = 'Export failed';
-    console.error(err);
+  const W=768,H=1152;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#3b0058');g.addColorStop(1,'#8e00a8');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  ctx.globalAlpha=0.35;
+  if(teamBg.src) {
+    const img=await loadImg(teamBg.src);
+    ctx.drawImage(img,0,0,W,H);
   }
+  ctx.globalAlpha=1;
+  if(roleImg.src){
+    const img=await loadImg(roleImg.src);
+    const maxW=W*0.62, maxH=H*0.48;
+    const scale=Math.min(maxW/img.width,maxH/img.height,1);
+    const dw=img.width*scale,dh=img.height*scale;
+    ctx.drawImage(img,(W-dw)/2,H*0.35-dh/2,dw,dh);
+  }
+  ctx.fillStyle='white';
+  ctx.font='bold 36px PT Serif';
+  ctx.textAlign='center';
+  ctx.fillText(nameText.textContent,W/2,H*0.8);
+  ctx.font='700 24px PT Serif';
+  ctx.fillText(roleText.textContent,W/2,H*0.84);
+  const a=document.createElement('a');
+  a.href=c.toDataURL('image/png');
+  a.download='fan_card.png';document.body.appendChild(a);a.click();a.remove();
 });
-
-/* update when inputs change */
-nameInput.addEventListener('input', applyPreview);
-roleSelect.addEventListener('change', applyPreview);
-teamSelect.addEventListener('change', applyPreview);
-
-/* init */
+function loadImg(src){return new Promise(r=>{const i=new Image();i.crossOrigin='anonymous';i.onload=()=>r(i);i.src=src;});}
 init();
 </script>
 
