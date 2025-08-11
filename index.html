@@ -291,6 +291,22 @@
       .preview{ width:92vw; }
       .card-wrap{ transform:scale(0.85); transform-origin:top center; }
     }
+    <!-- QR code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<!-- QR code generate -->
+<script>
+new QRCode(document.getElementById("qr-code"), {
+  text: "https://www.youtube.com/@YourChannelName",
+  width: 80,
+  height: 80,
+  colorDark: "#ffffff",
+  colorLight: "transparent",
+  correctLevel: QRCode.CorrectLevel.H
+});
+</script>
+</body>
+</html>
   </style>
 </head>
 <body>
@@ -368,6 +384,7 @@ const ROLE_NAME_MAP = {
   'role_6.png': 'Waterboy',
   'role_7.png': 'Fan' 
 };
+  
 const roleSelect = document.getElementById('roleSelect');
 const teamSelect = document.getElementById('teamSelect');
 const nameInput = document.getElementById('nameInput');
