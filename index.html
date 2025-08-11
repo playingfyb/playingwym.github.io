@@ -89,6 +89,21 @@
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+    .card::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%;   /* logo ka size control */
+  height: 80%;
+  background: url('team_logo.png') no-repeat center;
+  background-size: contain;
+  opacity: 0.08; /* halka transparent */
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none; /* click block na ho */
+}
+
 
 /* Card ke andar ka actual content overlay ke upar ho */
 .card > * {
