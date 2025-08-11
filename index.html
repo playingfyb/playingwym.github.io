@@ -431,9 +431,6 @@ function loadImage(src){return new Promise(r=>{const i=new Image();i.crossOrigin
 nameInput.addEventListener('input',applyPreview);
 roleSelect.addEventListener('change',applyPreview);
 teamSelect.addEventListener('change',applyPreview);
-
-
-init();
   <!-- html2canvas library -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
@@ -451,6 +448,7 @@ document.getElementById('dlBtn').addEventListener('click', () => {
     link.download = 'fan_card.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
+    init();
   });
 });
 
