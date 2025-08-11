@@ -196,18 +196,6 @@
   border-radius: 12px; /* rounded corners */
   filter: drop-shadow(0 0 25px rgba(0, 0, 0, 2.8)); /* soft outer shadow */
 }
-    /* QR Code placement - bottom right */
-#qr-code {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  z-index: 5;
-}
-
-/* QR Code styling */
-#qr-code canvas {
-  border-radius: 8px;
-}
 /* Player Info */
 .name {
   position:absolute; bottom:185px;
@@ -291,19 +279,6 @@
       .preview{ width:92vw; }
       .card-wrap{ transform:scale(0.85); transform-origin:top center; }
     }
-    <!-- QR code library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-<!-- QR code generate -->
-<script>
-new QRCode(document.getElementById("qr-code"), {
-  text: "https://www.youtube.com/@YourChannelName",
-  width: 80,
-  height: 80,
-  colorDark: "#ffffff",
-  colorLight: "transparent",
-  correctLevel: QRCode.CorrectLevel.H
-});
   </style>
 </head>
 <body>
@@ -355,19 +330,6 @@ new QRCode(document.getElementById("qr-code"), {
   </div>
 
 <script>
-  <!-- QR code library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-<script>
-  // QR code generate karna
-  new QRCode(document.getElementById("qr-code"), {
-    text: "https://www.youtube.com/@UniversaLGCofficial", // apna YouTube channel link
-    width: 80, // size
-    height: 80,
-    colorDark: "#ffffff", // QR code ka color
-    colorLight: "transparent", // transparent background
-    correctLevel: QRCode.CorrectLevel.H
-  });
 const OWNER = 'playingfyb';
 const REPO = 'playingwym.github.io';
 const ROLE_PATH = 'role_images';
@@ -381,7 +343,6 @@ const ROLE_NAME_MAP = {
   'role_6.png': 'Waterboy',
   'role_7.png': 'Fan' 
 };
-  
 const roleSelect = document.getElementById('roleSelect');
 const teamSelect = document.getElementById('teamSelect');
 const nameInput = document.getElementById('nameInput');
