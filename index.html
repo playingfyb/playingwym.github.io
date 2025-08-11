@@ -431,33 +431,8 @@ function loadImage(src){return new Promise(r=>{const i=new Image();i.crossOrigin
 nameInput.addEventListener('input',applyPreview);
 roleSelect.addEventListener('change',applyPreview);
 teamSelect.addEventListener('change',applyPreview);
-    init();
-  <script src="tumhara-existing.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-</body>
-</html>
 
-  // tumhara existing code...
-
-// yaha last me ye add karo
-document.getElementById('dlBtn').addEventListener('click', () => {
-  const card = document.querySelector('.card');
-
-  html2canvas(card, {
-    scale: 3,
-    width: card.offsetWidth,
-    height: card.offsetHeight,
-    backgroundColor: null
-  }).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'fan_card.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  });
-});
-
-
-
+init();
 </script>
 </body>
 </html>
